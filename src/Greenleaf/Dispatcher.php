@@ -13,6 +13,7 @@ use DecodeLabs\Archetype;
 use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf;
+use DecodeLabs\Greenleaf\Generator\Scanner;
 use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use Psr\Container\ContainerInterface;
@@ -42,17 +43,22 @@ class Dispatcher implements Handler
             return;
         }
 
-        Archetype::register(new GreenleafResolver(
-            interface: Action::class,
-            namespaces: Greenleaf::$namespaces,
-            named: true
-        ));
+        Archetype::register(
+            new GreenleafResolver(
+                interface: Action::class,
+                namespaces: Greenleaf::$namespaces,
+                named: true
+            ),
+            unique: true
+        );
 
-        Archetype::register(new GreenleafResolver(
-            interface: Generator::class,
-            namespaces: Greenleaf::$namespaces,
-            local: true
-        ));
+        Archetype::register(
+            new GreenleafResolver(
+                interface: Generator::class,
+                namespaces: Greenleaf::$namespaces,
+            ),
+            unique: true
+        );
 
         Dispatcher::$setup = true;
     }
@@ -72,8 +78,26 @@ class Dispatcher implements Handler
      */
     public function loadGenerator(): Generator
     {
-        $class = Archetype::resolve(Generator::class, [null, 'Scanner']);
-        return new $class();
+        $generator = null;
+
+        if($this->container instanceof PandoraContainer) {
+            $generator = $this->container->tryGet(Generator::class);
+        } elseif(
+            $this->container &&
+            $this->container->has(Generator::class)
+        ) {
+            if(!($generator = $this->container->get(Generator::class))
+                instanceof Generator
+            ) {
+                $generator = null;
+            }
+        }
+
+        if($generator === null) {
+            $generator = new Scanner();
+        }
+
+        return $generator;
     }
 
     /**
