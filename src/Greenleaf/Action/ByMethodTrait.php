@@ -16,6 +16,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 trait ByMethodTrait
 {
+    use InvocationTrait;
+
     /**
      * Handle HTTP request
      */
@@ -35,9 +37,13 @@ trait ByMethodTrait
         }
 
         $method = strtolower($method);
-        $args = [];
 
-        return $this->{$method}(...$args);
+        return $this->{$method}(...$this->prepareMethodParameters(
+            method: $method,
+            parameters: $parameters,
+            url: $url,
+            request: $request
+        ));
     }
 
     /**
