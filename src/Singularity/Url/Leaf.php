@@ -92,7 +92,7 @@ class Leaf implements
     public static function normalizeArea(
         string|null $area
     ): string {
-        if($area === null) {
+        if ($area === null) {
             $area = 'front';
         }
 
@@ -106,8 +106,8 @@ class Leaf implements
     {
         $output = 'leaf://';
 
-        if($this->area !== 'front') {
-            $output .= '~'.$this->area;
+        if ($this->area !== 'front') {
+            $output .= '~' . $this->area;
         }
 
         if ($this->path !== null) {
