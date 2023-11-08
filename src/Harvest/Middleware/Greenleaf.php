@@ -30,8 +30,6 @@ class Greenleaf extends Dispatcher implements Middleware
             return $hit->getRoute()->handle($request, $hit->getParameters());
         } catch (RouteNotFoundException $e) {
             return $next->handle($request);
-        } catch (\Throwable $e) {
-            dd($e);
         }
     }
 }
