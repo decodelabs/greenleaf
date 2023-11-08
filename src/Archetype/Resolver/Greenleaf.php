@@ -108,6 +108,12 @@ class Greenleaf implements Scanner
      */
     public function scanClasses(): Generator
     {
-        dd($this);
+        if($this->local) {
+            yield from $this->scanNamespaceClasses($this->interface);
+        }
+
+        foreach ($this->namespaces as $namespace) {
+            yield from $this->scanNamespaceClasses($namespace, $this->interface);
+        }
     }
 }
