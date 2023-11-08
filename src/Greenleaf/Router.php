@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
@@ -24,7 +25,7 @@ interface Router
      */
     public function routeIn(
         Request $request
-    ): ?Route;
+    ): ?Hit;
 
 
     /**
@@ -35,5 +36,5 @@ interface Router
     public function routeOut(
         string|LeafUrl $uri,
         ?array $params = null
-    ): ?Route;
+    ): ?Hit;
 }

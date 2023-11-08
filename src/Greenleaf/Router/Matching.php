@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Router;
 
-use DecodeLabs\Greenleaf\Route;
+use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Greenleaf\RouterTrait;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
@@ -26,13 +26,13 @@ class Matching implements Router
      */
     public function routeIn(
         Request $request
-    ): ?Route {
+    ): ?Hit {
         $method = $request->getMethod();
         $uri = $request->getUri();
 
         foreach ($this->scanRoutes($this->generator) as $route) {
-            if ($route->matchesIn($method, $uri)) {
-                return $route;
+            if ($hit = $route->matchIn($method, $uri)) {
+                return $hit;
             }
         }
 
@@ -48,10 +48,10 @@ class Matching implements Router
     public function routeOut(
         string|LeafUrl $uri,
         ?array $params = null
-    ): ?Route {
+    ): ?Hit {
         foreach ($this->scanRoutes($this->generator) as $route) {
-            if ($route->matchesOut($uri, $params)) {
-                return $route;
+            if ($hit = $route->matchOut($uri, $params)) {
+                return $hit;
             }
         }
 

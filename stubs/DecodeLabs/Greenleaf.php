@@ -8,6 +8,7 @@ namespace DecodeLabs;
 use DecodeLabs\Veneer\Proxy as Proxy;
 use DecodeLabs\Veneer\ProxyTrait as ProxyTrait;
 use DecodeLabs\Greenleaf\Context as Inst;
+use DecodeLabs\Archetype\NamespaceMap as NamespacesPlugin;
 use Closure as Ref0;
 use DecodeLabs\Greenleaf\Route\Action as Ref1;
 use DecodeLabs\Greenleaf\Route\Redirect as Ref2;
@@ -20,6 +21,7 @@ class Greenleaf implements Proxy
     const VENEER_TARGET = Inst::class;
 
     public static Inst $instance;
+    public static NamespacesPlugin $namespaces;
 
     public static function route(string $pattern, string $target, ?Ref0 $setup = NULL): Ref1 {
         return static::$instance->route(...func_get_args());

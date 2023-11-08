@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Compiler\Parameter;
 use DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
@@ -150,20 +151,21 @@ trait RouteTrait
 
 
 
-    public function matchesIn(
+    public function matchIn(
         string $method,
         Uri $uri
-    ): bool {
+    ): ?Hit {
         if (!$this->acceptsMethod($method)) {
-            return false;
+            return null;
         }
 
         $parts = explode('/', ltrim($uri->getPath(), '/'));
+        $parameters = [];
 
         foreach ($this->pattern->getSegments() as $i => $segment) {
             if (!isset($parts[$i])) {
                 if (!$segment->isWholeParameter()) {
-                    return false;
+                    return null;
                 }
 
                 $paramName = $segment->getParameterNames()[0];
@@ -172,30 +174,48 @@ trait RouteTrait
                     !isset($this->parameters[$paramName]) ||
                     !$this->parameters[$paramName]->hasDefault()
                 ) {
-                    return false;
+                    return null;
                 }
 
                 $parts[$i] = $this->parameters[$paramName]->getDefault();
                 continue;
             }
 
-            if (!$segment->matches($this, $parts[$i])) {
-                return false;
+            if (!$params = $segment->match($this, $parts[$i])) {
+                return null;
             }
+
+            $parameters = array_merge($parameters, $params);
 
             unset($parts[$i]);
         }
 
-        return empty($parts);
+        if (!empty($parts)) {
+            return null;
+        }
+
+        foreach ($parameters as $name => $value) {
+            if (!isset($this->parameters[$name])) {
+                continue;
+            }
+
+            if (!$this->parameters[$name]->validate($value)) {
+                return null;
+            }
+
+            $parameters[$name] = $this->parameters[$name]->resolve($value);
+        }
+
+        return new Hit($this, $parameters);
     }
 
     /**
      * @param array<string, string|Stringable|int|float|null> $params
      */
-    public function matchesOut(
+    public function matchOut(
         string|LeafUrl $uri,
         ?array $params = null
-    ): bool {
+    ): ?Hit {
         dd($uri, $params, $this);
     }
 }

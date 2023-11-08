@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Route;
 
+use DecodeLabs\Archetype;
+use DecodeLabs\Greenleaf\Action as ActionInterface;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
+use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -44,8 +47,14 @@ class Action implements Route
      * Handle request
      */
     public function handle(
-        Request $request
+        Request $request,
+        array $parameters
     ): Response {
-        dd($request);
+        $uri = LeafUrl::fromString($this->target);
+
+        $class = Archetype::resolve(ActionInterface::class, (string)$uri);
+        $action = new $class();
+
+        return $action->execute($request, $uri, $parameters);
     }
 }

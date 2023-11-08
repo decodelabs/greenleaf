@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Archetype;
+use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
+use DecodeLabs\Greenleaf;
+use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -20,11 +23,38 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
 class Dispatcher implements Handler
 {
     protected ?ContainerInterface $container = null;
+    protected static bool $setup = false;
 
     public function __construct(
         ?ContainerInterface $container = null
     ) {
         $this->container = $container;
+
+        $this->setupArchetype();
+    }
+
+    /**
+     * Setup archetype
+     */
+    protected static function setupArchetype(): void
+    {
+        if (Dispatcher::$setup) {
+            return;
+        }
+
+        Archetype::register(new GreenleafResolver(
+            interface: Action::class,
+            namespaces: Greenleaf::$namespaces,
+            named: true
+        ));
+
+        Archetype::register(new GreenleafResolver(
+            interface: Generator::class,
+            namespaces: Greenleaf::$namespaces,
+            local: true
+        ));
+
+        Dispatcher::$setup = true;
     }
 
     /**
@@ -33,8 +63,8 @@ class Dispatcher implements Handler
     final public function handle(
         Request $request
     ): Response {
-        return $this->findRoute($request)
-            ->handle($request);
+        $hit = $this->findRoute($request);
+        return $hit->getRoute()->handle($request, $hit->getParameters());
     }
 
     /**
@@ -42,9 +72,8 @@ class Dispatcher implements Handler
      */
     public function loadGenerator(): Generator
     {
-        /** @var Generator $output */
-        $output = new \Songsprout\Api\Greenleaf\Routes(); // @phpstan-ignore-line
-        return $output;
+        $class = Archetype::resolve(Generator::class, [null, 'Scanner']);
+        return new $class();
     }
 
     /**
@@ -88,18 +117,18 @@ class Dispatcher implements Handler
      */
     public function findRoute(
         Request $request
-    ): Route {
+    ): Hit {
         $generator = $this->loadGenerator();
         $router = $this->loadRouter($generator);
 
 
         // Route request
-        if (!$route = $router->routeIn($request)) {
-            throw Exceptional::NotFound(
+        if (!$hit = $router->routeIn($request)) {
+            throw Exceptional::RouteNotFound(
                 'Route not found: ' . $request->getUri()->getPath()
             );
         }
 
-        return $route;
+        return $hit;
     }
 }

@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace DecodeLabs\Harvest\Middleware;
 
 use DecodeLabs\Greenleaf\Dispatcher;
-use DecodeLabs\Greenleaf\NotFoundException;
+use DecodeLabs\Greenleaf\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -26,10 +26,12 @@ class Greenleaf extends Dispatcher implements Middleware
         Handler $next
     ): Response {
         try {
-            return $this->findRoute($request)
-                ->handle($request);
-        } catch (NotFoundException $e) {
+            $hit = $this->findRoute($request);
+            return $hit->getRoute()->handle($request, $hit->getParameters());
+        } catch (RouteNotFoundException $e) {
             return $next->handle($request);
+        } catch (\Throwable $e) {
+            dd($e);
         }
     }
 }

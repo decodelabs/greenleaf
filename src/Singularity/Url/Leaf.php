@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Singularity\Url;
 
+use DecodeLabs\Dictum;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Dumpable;
 use DecodeLabs\Singularity\Url;
@@ -44,9 +45,21 @@ class Leaf implements
             );
         }
 
+        $path = $parts['path'] ?? null;
+        $host = $parts['host'] ?? null;
+
+        if (
+            $host !== null &&
+            $host !== '' &&
+            !str_starts_with($host, '~')
+        ) {
+            $path = $host . '/' . $path;
+            $host = null;
+        }
+
         return new static(
-            area: $parts['host'] ?? null,
-            path: $parts['path'] ?? null,
+            area: $host,
+            path: $path,
             query: $parts['query'] ?? null,
             fragment: $parts['fragment'] ?? null
         );
@@ -111,7 +124,13 @@ class Leaf implements
         }
 
         if ($this->path !== null) {
-            $output .= $this->path;
+            $path = $this->path;
+
+            if ($this->area === 'front') {
+                $path = ltrim($path, '/');
+            }
+
+            $output .= $path;
         }
 
         if ($this->query !== null) {
@@ -120,6 +139,25 @@ class Leaf implements
 
         if ($this->fragment !== null) {
             $output .= '#' . $this->fragment;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Convert to class name string
+     */
+    public function toClassName(): string
+    {
+        $output = Dictum::id($this->area ?? 'Front');
+
+        if (
+            $this->path !== null &&
+            $this->path !== '/'
+        ) {
+            $parts = explode('/', trim($this->path, '/'));
+            $parts = array_map(Dictum::id(...), $parts);
+            $output .= '\\' . implode('\\', $parts);
         }
 
         return $output;

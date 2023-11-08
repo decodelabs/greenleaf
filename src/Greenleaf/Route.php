@@ -9,15 +9,17 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Compiler\Parameter;
 use DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UriInterface as Uri;
-use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Stringable;
 
-interface Route extends Handler
+interface Route
 {
     public function getPattern(): Pattern;
 
@@ -79,16 +81,25 @@ interface Route extends Handler
 
 
 
-    public function matchesIn(
+    public function matchIn(
         string $method,
         Uri $uri
-    ): bool;
+    ): ?Hit;
 
     /**
      * @param array<string, string|Stringable|int|float|null> $params
      */
-    public function matchesOut(
+    public function matchOut(
         string|LeafUrl $uri,
         ?array $params = null
-    ): bool;
+    ): ?Hit;
+
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    public function handle(
+        Request $request,
+        array $parameters
+    ): Response;
 }

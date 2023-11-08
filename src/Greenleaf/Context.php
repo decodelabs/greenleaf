@@ -10,15 +10,33 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use Closure;
+use DecodeLabs\Archetype\NamespaceMap;
 use DecodeLabs\Greenleaf;
 use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
 use DecodeLabs\Greenleaf\Route\Redirect as RedirectRoute;
 use DecodeLabs\Veneer;
 use DecodeLabs\Veneer\LazyLoad;
+use DecodeLabs\Veneer\Plugin;
 
 #[LazyLoad]
 class Context
 {
+    #[Plugin]
+    public NamespaceMap $namespaces;
+
+    /**
+     * Init with namespace map
+     */
+    public function __construct(
+        ?NamespaceMap $namespaces = null
+    ) {
+        $this->namespaces = $namespaces ?? new NamespaceMap();
+    }
+
+
+
+
+
     /**
      * Create action route
      */

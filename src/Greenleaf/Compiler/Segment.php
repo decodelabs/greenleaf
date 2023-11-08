@@ -15,12 +15,12 @@ use DecodeLabs\Greenleaf\Route;
 
 class Segment implements Dumpable
 {
-    protected int $index;
+    protected readonly int $index;
 
     /**
      * @var array<string|Parameter>
      */
-    protected array $tokens;
+    protected readonly array $tokens;
 
     /**
      * Parse string
@@ -67,17 +67,23 @@ class Segment implements Dumpable
      */
     public function getParameterNames(): array
     {
-        $output = [];
+        static $output;
 
-        foreach ($this->tokens as $token) {
-            if (!$token instanceof Parameter) {
-                continue;
+        if (!isset($output)) {
+            $output = [];
+
+            foreach ($this->tokens as $token) {
+                if (!$token instanceof Parameter) {
+                    continue;
+                }
+
+                $output[] = $token->getName();
             }
 
-            $output[] = $token->getName();
+            $output = array_unique($output);
         }
 
-        return array_unique($output);
+        return $output;
     }
 
     /**
@@ -92,17 +98,30 @@ class Segment implements Dumpable
 
     /**
      * Check match
+     *
+     * @return array<?string>|null
      */
-    public function matches(
+    public function match(
         Route $route,
         string $part
-    ): bool {
+    ): ?array {
         if ($part === '') {
-            return empty($this->tokens);
+            return empty($this->tokens) ? [] : null;
         }
 
         $regex = $this->compile($route);
-        return (bool)preg_match($regex, $part);
+
+        if (!preg_match($regex, $part, $matches)) {
+            return null;
+        }
+
+        $params = [];
+
+        foreach ($this->getParameterNames() as $name) {
+            $params[$name] = $matches[$name];
+        }
+
+        return $params;
     }
 
     /**

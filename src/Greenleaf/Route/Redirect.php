@@ -100,7 +100,8 @@ class Redirect implements Route
      * Handle request
      */
     public function handle(
-        Request $request
+        Request $request,
+        array $parameters
     ): Response {
         $currentUrl = $request->getUri();
         $url = Singularity::url($this->target, $currentUrl);
