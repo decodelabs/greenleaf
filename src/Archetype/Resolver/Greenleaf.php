@@ -108,7 +108,7 @@ class Greenleaf implements Scanner
      */
     public function scanClasses(): Generator
     {
-        if($this->local) {
+        if ($this->local) {
             yield from $this->scanNamespaceClasses($this->interface);
         }
 

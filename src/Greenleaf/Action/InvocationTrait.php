@@ -47,25 +47,25 @@ trait InvocationTrait
             }
 
             // Leaf URL query
-            if(isset($query[$name])) {
+            if (isset($query[$name])) {
                 $output[$name] = $query[$name];
                 continue;
             }
 
             // PSR-7 query
-            if(array_key_exists($name, $queryParams)) {
+            if (array_key_exists($name, $queryParams)) {
                 $output[$name] = $queryParams[$name];
                 continue;
             }
 
             // Type
-            if(
+            if (
                 ($type = $param->getType()) &&
                 $type instanceof ReflectionNamedType
             ) {
-                switch($type) {
+                switch ($type) {
                     case HarvestRequest::class:
-                        if(!$request instanceof HarvestRequest) {
+                        if (!$request instanceof HarvestRequest) {
                             break;
                         }
 
@@ -97,7 +97,7 @@ trait InvocationTrait
             }
 
             throw Exceptional::UnexpectedValue(
-                'Method "'.$method->getName().'" missing required parameter: ' . $name
+                'Method "' . $method->getName() . '" missing required parameter: ' . $name
             );
         }
 

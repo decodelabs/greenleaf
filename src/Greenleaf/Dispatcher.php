@@ -13,8 +13,8 @@ use DecodeLabs\Archetype;
 use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf;
-use DecodeLabs\Greenleaf\Generator\Scanner;
 use DecodeLabs\Greenleaf\Compiler\Hit;
+use DecodeLabs\Greenleaf\Generator\Scanner;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -80,20 +80,20 @@ class Dispatcher implements Handler
     {
         $generator = null;
 
-        if($this->container instanceof PandoraContainer) {
+        if ($this->container instanceof PandoraContainer) {
             $generator = $this->container->tryGet(Generator::class);
-        } elseif(
+        } elseif (
             $this->container &&
             $this->container->has(Generator::class)
         ) {
-            if(!($generator = $this->container->get(Generator::class))
+            if (!($generator = $this->container->get(Generator::class))
                 instanceof Generator
             ) {
                 $generator = null;
             }
         }
 
-        if($generator === null) {
+        if ($generator === null) {
             $generator = new Scanner();
         }
 
