@@ -7,9 +7,8 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Action;
+namespace DecodeLabs\Greenleaf;
 
-use DecodeLabs\Exceptional;
 use DecodeLabs\Harvest\Request as HarvestRequest;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -17,8 +16,20 @@ use Psr\Http\Message\UriInterface as Uri;
 use ReflectionClass;
 use ReflectionNamedType;
 
-trait InvocationTrait
+trait ActionTrait
 {
+    protected Context $context;
+
+    /**
+     * Init with Context
+     */
+    public function __construct(
+        Context $context
+    ) {
+        $this->context = $context;
+    }
+
+
     /**
      * Prepare method parameters
      *

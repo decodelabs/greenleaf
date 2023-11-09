@@ -98,7 +98,8 @@ interface Route
     /**
      * @param array<string, mixed> $parameters
      */
-    public function handle(
+    public function handleIn(
+        Context $context,
         Request $request,
         array $parameters
     ): Response;

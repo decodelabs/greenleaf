@@ -9,7 +9,7 @@
 
 ### Super-fast directory based HTTP router
 
-Greenleaf provides ...
+Greenleaf provides a simple, fast and flexible way to route HTTP requests to controllers and actions based on the URL path.
 
 _Get news and updates on the [DecodeLabs blog](https://blog.decodelabs.com)._
 

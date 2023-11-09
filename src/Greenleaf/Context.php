@@ -10,13 +10,16 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use Closure;
-use DecodeLabs\Archetype;
+use DecodeLabs\Archetype\Handler as ArchetypeHandler;
 use DecodeLabs\Archetype\NamespaceMap;
+use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf;
-use DecodeLabs\Greenleaf\Generator\Scanner;
+use DecodeLabs\Greenleaf\Compiler\Hit;
+use DecodeLabs\Greenleaf\Context\Loader;
 use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
 use DecodeLabs\Greenleaf\Route\Redirect as RedirectRoute;
+use DecodeLabs\Harvest\Middleware\Greenleaf as GreenleafMiddleware;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use DecodeLabs\Singularity\Url;
 use DecodeLabs\Singularity\Url\Http as HttpUrl;
@@ -24,95 +27,171 @@ use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Veneer;
 use DecodeLabs\Veneer\LazyLoad;
 use DecodeLabs\Veneer\Plugin;
-use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerInterface as Container;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
 
 #[LazyLoad]
 class Context
 {
+    protected const ARCHETYPES = [
+        Generator::class => [],
+        Action::class => ['named' => true],
+    ];
+
     #[Plugin]
     public NamespaceMap $namespaces;
 
-    protected ?ContainerInterface $container = null;
+    #[Plugin]
+    public ArchetypeHandler $archetype;
 
-    protected Router $router;
+    #[Plugin]
+    public Router $router;
+
+    public ?Container $container = null;
+
 
     /**
      * Init with namespace map
      */
     public function __construct(
         ?NamespaceMap $namespaces = null,
-        ?ContainerInterface $container = null
+        ?Container $container = null
     ) {
         $this->namespaces = $namespaces ?? new NamespaceMap();
+        $this->archetype = new ArchetypeHandler();
         $this->container = $container;
-    }
 
+        foreach (self::ARCHETYPES as $interface => $options) {
+            $options['interface'] = $interface;
+            $options['namespaces'] = $this->namespaces;
 
-    /**
-     * Load router
-     */
-    public function getRouter(): Router
-    {
-        if (isset($this->router)) {
-            return $this->router;
+            $this->archetype->register(
+                /** @phpstan-ignore-next-line */
+                new GreenleafResolver(...$options),
+                unique: true
+            );
         }
 
-        $generator = $this->loadGenerator();
+        $loader = $this->initLoader();
+        $generator = $loader->loadGenerator();
+        $this->router = $loader->loadRouter($generator);
+    }
 
-        $router = null;
+    protected function initLoader(): Loader
+    {
+        $loader = null;
 
-        // Load router
+        // Load loader
         if ($this->container instanceof PandoraContainer) {
-            $router = $this->container->tryGetWith(Router::class, [
-                'generator' => $generator
+            $loader = $this->container->tryGetWith(Loader::class, [
+                'context' => $this,
+                'archetype' => $this->archetype,
+                'container' => $this->container
             ]);
         } elseif (
             $this->container &&
-            $this->container->has(Router::class)
+            $this->container->has(Loader::class)
         ) {
-            if (!($router = $this->container->get(Router::class))
-                instanceof Router
+            if (!($loader = $this->container->get(Loader::class))
+                instanceof Loader
             ) {
-                $router = null;
+                $loader = null;
             }
         }
 
-        if (!$router) {
-            $class = Archetype::resolve(Router::class, [null, 'Matching']);
-            $router = new $class($generator);
+        if (!$loader) {
+            $class = $this->archetype->resolve(Loader::class);
+            $loader = new $class($this);
         }
 
-        return $this->router = $router;
+        return $loader;
+    }
+
+
+    /**
+     * Create dispatcher
+     */
+    public function createDispatcher(): Dispatcher
+    {
+        return new GreenleafMiddleware($this);
+    }
+
+
+
+    /**
+     * Load route for Request
+     */
+    public function matchIn(
+        Request $request,
+        bool $checkDir = false
+    ): Hit {
+        // Route request
+        if (!$hit = $this->router->matchIn($request)) {
+            if (
+                $checkDir &&
+                $hit = $this->testDirMatch($request)
+            ) {
+                return $hit;
+            }
+
+            throw Exceptional::RouteNotFound(
+                'Route not found: ' . $request->getUri()->getPath()
+            );
+        }
+
+        return $hit;
     }
 
     /**
-    * Load generator
-    */
-    protected function loadGenerator(): Generator
-    {
-        $generator = null;
+     * Test if tailing / affects match
+     */
+    protected function testDirMatch(
+        Request $request
+    ): ?Hit {
+        $url = $request->getUri();
+        $path = $url->getPath();
 
-        if ($this->container instanceof PandoraContainer) {
-            $generator = $this->container->tryGet(Generator::class);
-        } elseif (
-            $this->container &&
-            $this->container->has(Generator::class)
-        ) {
-            if (!($generator = $this->container->get(Generator::class))
-                instanceof Generator
-            ) {
-                $generator = null;
-            }
+        if (str_ends_with($path, '/')) {
+            $newPath = substr($path, 0, -1);
+        } else {
+            $newPath = $path . '/';
         }
 
-        if ($generator === null) {
-            $generator = new Scanner();
+        $url = $url->withPath($newPath);
+        $request = $request->withUri($url);
+
+        if (!$hit = $this->router->matchIn($request)) {
+            return null;
         }
 
-        return $generator;
+        return new Hit(
+            new RedirectRoute($path, $newPath),
+            [],
+        );
     }
 
+    /**
+     * Load route for URI
+     *
+     * @param array<string, string|Stringable|int|float|null>|null $params
+     */
+    public function matchOut(
+        string|LeafUrl $uri,
+        ?array $params = null
+    ): Hit {
+        if (is_string($uri)) {
+            $uri = LeafUrl::fromString($uri);
+        }
+
+        if (!$hit = $this->router->matchOut($uri, $params)) {
+            throw Exceptional::RouteNotMatched(
+                'Unable to match uri to route'
+            );
+        }
+
+        return $hit;
+    }
 
 
 
@@ -129,7 +208,7 @@ class Context
             $uri = LeafUrl::fromString($uri);
         }
 
-        if (!$hit = $this->getRouter()->matchOut($uri, $params)) {
+        if (!$hit = $this->router->matchOut($uri, $params)) {
             throw Exceptional::RouteNotMatched(
                 'Unable to match uri to route'
             );

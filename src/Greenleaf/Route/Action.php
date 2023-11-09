@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Route;
 
-use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Action as ActionInterface;
 use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
+use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
@@ -48,6 +48,21 @@ class Action implements Route
     public function getTarget(): LeafUrl
     {
         return $this->target;
+    }
+
+
+    /**
+     * Handle request
+     */
+    public function handleIn(
+        Context $context,
+        Request $request,
+        array $parameters
+    ): Response {
+        $class = $context->archetype->resolve(ActionInterface::class, (string)$this->target);
+        $action = new $class($context);
+
+        return $action->execute($request, $this->target, $parameters);
     }
 
 
@@ -100,19 +115,5 @@ class Action implements Route
         );
 
         return new Hit($this, $parameters, $query->toDelimitedString());
-    }
-
-
-    /**
-     * Handle request
-     */
-    public function handle(
-        Request $request,
-        array $parameters
-    ): Response {
-        $class = Archetype::resolve(ActionInterface::class, (string)$this->target);
-        $action = new $class();
-
-        return $action->execute($request, $this->target, $parameters);
     }
 }

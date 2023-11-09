@@ -9,15 +9,17 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Generator;
 
-use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Generator;
+use DecodeLabs\Greenleaf\GeneratorTrait;
 
 class Scanner implements Generator
 {
+    use GeneratorTrait;
+
     public function generateRoutes(): iterable
     {
-        $class = Archetype::resolve(Generator::class, 'routes');
-        $routes = new $class();
+        $class = $this->context->archetype->resolve(Generator::class, 'routes');
+        $routes = new $class($this->context);
 
         yield from $routes->generateRoutes();
     }

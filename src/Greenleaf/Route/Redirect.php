@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\Route;
 
 use DecodeLabs\Greenleaf\Compiler\Pattern;
+use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
 use DecodeLabs\Harvest;
@@ -99,7 +100,8 @@ class Redirect implements Route
     /**
      * Handle request
      */
-    public function handle(
+    public function handleIn(
+        Context $context,
         Request $request,
         array $parameters
     ): Response {

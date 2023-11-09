@@ -9,16 +9,13 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
-interface Generator
+trait GeneratorTrait
 {
+    protected Context $context;
+
     public function __construct(
         Context $context
-    );
-
-    /**
-     * Generate routes
-     *
-     * @return iterable<Route|Generator>
-     */
-    public function generateRoutes(): iterable;
+    ) {
+        $this->context = $context;
+    }
 }

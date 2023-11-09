@@ -15,6 +15,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 interface Action
 {
+    public function __construct(
+        Context $context
+    );
+
     /**
      * @param array<string, mixed> $parameters
      */

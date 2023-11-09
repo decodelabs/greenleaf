@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Action;
 
+use DecodeLabs\Greenleaf\ActionTrait;
 use DecodeLabs\Harvest;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -16,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 trait ByMethodTrait
 {
-    use InvocationTrait;
+    use ActionTrait;
 
     /**
      * Handle HTTP request
