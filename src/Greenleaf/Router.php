@@ -23,7 +23,7 @@ interface Router
     /**
      * Find route for request
      */
-    public function routeIn(
+    public function matchIn(
         Request $request
     ): ?Hit;
 
@@ -33,7 +33,7 @@ interface Router
      *
      * @param array<string, string|Stringable|int|float|null> $params
      */
-    public function routeOut(
+    public function matchOut(
         string|LeafUrl $uri,
         ?array $params = null
     ): ?Hit;

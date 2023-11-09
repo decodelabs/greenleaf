@@ -77,7 +77,19 @@ abstract class ValidatorAbstract implements Validator
             $type = 'text';
         }
 
-        $class = Archetype::resolve(Validator::class, Coercion::toString($type));
+        $class = Archetype::resolve(
+            Validator::class,
+            ucfirst(Coercion::toString($type))
+        );
+
         return new $class(...$input);
+    }
+
+    /**
+     * Is multi segment
+     */
+    public function isMultiSegment(): bool
+    {
+        return false;
     }
 }

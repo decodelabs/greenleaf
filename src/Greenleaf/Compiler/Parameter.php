@@ -93,12 +93,25 @@ class Parameter
 
 
     /**
+     * Is multi segment
+     */
+    public function isMultiSegment(): bool
+    {
+        if (!$this->validator) {
+            return false;
+        }
+
+        return $this->validator->isMultiSegment();
+    }
+
+
+    /**
      * Get regex fragment
      */
     public function getRegexFragment(): string
     {
         if ($this->validator) {
-            return $this->validator->getRegexFragment();
+            return $this->validator->getRegexFragment($this->name);
         }
 
         return '(?P<' . $this->name . '>\w+)';

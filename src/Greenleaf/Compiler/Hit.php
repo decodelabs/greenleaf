@@ -18,7 +18,8 @@ class Hit
      */
     public function __construct(
         protected readonly Route $route,
-        protected readonly array $parameters
+        protected readonly array $parameters,
+        protected readonly ?string $queryString = null
     ) {
     }
 
@@ -38,5 +39,13 @@ class Hit
     public function getParameters(): array
     {
         return $this->parameters;
+    }
+
+    /**
+     * Get query string
+     */
+    public function getQueryString(): ?string
+    {
+        return $this->queryString;
     }
 }

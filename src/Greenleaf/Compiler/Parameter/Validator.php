@@ -36,8 +36,11 @@ interface Validator
         array $input
     ): ?Validator;
 
+    public function isMultiSegment(): bool;
 
-    public function getRegexFragment(): string;
+    public function getRegexFragment(
+        string $name
+    ): string;
 
 
     public function validate(

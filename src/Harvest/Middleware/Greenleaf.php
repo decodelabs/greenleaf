@@ -26,7 +26,7 @@ class Greenleaf extends Dispatcher implements Middleware
         Handler $next
     ): Response {
         try {
-            $hit = $this->findRoute($request);
+            $hit = $this->matchIn($request);
             return $hit->getRoute()->handle($request, $hit->getParameters());
         } catch (RouteNotFoundException $e) {
             return $next->handle($request);

@@ -112,6 +112,9 @@ class Leaf implements
         return ltrim($area, '~');
     }
 
+
+
+
     /**
      * Convert to string
      */

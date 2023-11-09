@@ -9,9 +9,11 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Compiler;
 
+use DecodeLabs\Coercion;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Dumpable;
 use DecodeLabs\Greenleaf\Route;
+use Stringable;
 
 class Segment implements Dumpable
 {
@@ -23,11 +25,17 @@ class Segment implements Dumpable
     protected readonly array $tokens;
 
     /**
+     * @var array<string>
+     */
+    protected array $parameterNames;
+
+    /**
      * Parse string
      */
     public static function fromString(
         int $index,
         string $segment,
+        ?Route $route = null
     ): static {
         $tokens = preg_split('/(\{[a-zA-Z0-9_]+\})/', $segment, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
@@ -39,7 +47,7 @@ class Segment implements Dumpable
 
         foreach ($tokens as $i => $token) {
             if (preg_match('/^\{([a-zA-Z0-9_]+)\}$/', $token, $matches)) {
-                $tokens[$i] = new Parameter($matches[1]);
+                $tokens[$i] = $route?->getParameter($matches[1]) ?? new Parameter($matches[1]);
             }
         }
 
@@ -67,23 +75,21 @@ class Segment implements Dumpable
      */
     public function getParameterNames(): array
     {
-        static $output;
-
-        if (!isset($output)) {
-            $output = [];
+        if (!isset($this->parameterNames)) {
+            $this->parameterNames = [];
 
             foreach ($this->tokens as $token) {
                 if (!$token instanceof Parameter) {
                     continue;
                 }
 
-                $output[] = $token->getName();
+                $this->parameterNames[] = $token->getName();
             }
 
-            $output = array_unique($output);
+            $this->parameterNames = array_unique($this->parameterNames);
         }
 
-        return $output;
+        return $this->parameterNames;
     }
 
     /**
@@ -97,19 +103,32 @@ class Segment implements Dumpable
     }
 
     /**
+     * Is multi segment
+     */
+    public function isMultiSegment(): bool
+    {
+        if (!$this->isWholeParameter()) {
+            return false;
+        }
+
+        /** @var Parameter $param */
+        $param = $this->tokens[0];
+        return $param->isMultiSegment();
+    }
+
+    /**
      * Check match
      *
      * @return array<?string>|null
      */
     public function match(
-        Route $route,
         string $part
     ): ?array {
         if ($part === '') {
             return empty($this->tokens) ? [] : null;
         }
 
-        $regex = $this->compile($route);
+        $regex = $this->compile();
 
         if (!preg_match($regex, $part, $matches)) {
             return null;
@@ -127,9 +146,8 @@ class Segment implements Dumpable
     /**
      * Compile to regex
      */
-    public function compile(
-        Route $route
-    ): string {
+    public function compile(): string
+    {
         $parts = [];
 
         foreach ($this->tokens as $token) {
@@ -138,11 +156,40 @@ class Segment implements Dumpable
                 continue;
             }
 
-            $param = $route->getParameter($token->getName()) ?? $token;
-            $parts[] = $param->getRegexFragment();
+            $parts[] = $token->getRegexFragment();
         }
 
         return '/^' . implode('', $parts) . '$/';
+    }
+
+    /**
+     * Convert back to string
+     *
+     * @param array<string, string|Stringable|int|float|null> $parameters
+     */
+    public function resolve(
+        array $parameters
+    ): string {
+        $output = [];
+
+        foreach ($this->tokens as $token) {
+            if (is_string($token)) {
+                $output[] = $token;
+                continue;
+            }
+
+            $name = $token->getName();
+
+            if (!isset($parameters[$name])) {
+                throw Exceptional::UnexpectedValue(
+                    'Missing parameter value: ' . $name
+                );
+            }
+
+            $output[] = Coercion::toString($parameters[$name]);
+        }
+
+        return implode('', $output);
     }
 
 

@@ -9,9 +9,12 @@ use DecodeLabs\Veneer\Proxy as Proxy;
 use DecodeLabs\Veneer\ProxyTrait as ProxyTrait;
 use DecodeLabs\Greenleaf\Context as Inst;
 use DecodeLabs\Archetype\NamespaceMap as NamespacesPlugin;
-use Closure as Ref0;
-use DecodeLabs\Greenleaf\Route\Action as Ref1;
-use DecodeLabs\Greenleaf\Route\Redirect as Ref2;
+use DecodeLabs\Greenleaf\Router as Ref0;
+use DecodeLabs\Singularity\Url\Leaf as Ref1;
+use DecodeLabs\Singularity\Url as Ref2;
+use Closure as Ref3;
+use DecodeLabs\Greenleaf\Route\Action as Ref4;
+use DecodeLabs\Greenleaf\Route\Redirect as Ref5;
 
 class Greenleaf implements Proxy
 {
@@ -23,10 +26,16 @@ class Greenleaf implements Proxy
     public static Inst $instance;
     public static NamespacesPlugin $namespaces;
 
-    public static function route(string $pattern, string $target, ?Ref0 $setup = NULL): Ref1 {
+    public static function getRouter(): Ref0 {
+        return static::$instance->getRouter();
+    }
+    public static function createUrl(Ref1|string $uri, ?array $params = NULL): Ref2 {
+        return static::$instance->createUrl(...func_get_args());
+    }
+    public static function route(string $pattern, string $target, ?Ref3 $setup = NULL): Ref4 {
         return static::$instance->route(...func_get_args());
     }
-    public static function redirect(string $pattern, string $target, ?Ref0 $setup = NULL): Ref2 {
+    public static function redirect(string $pattern, string $target, ?Ref3 $setup = NULL): Ref5 {
         return static::$instance->redirect(...func_get_args());
     }
 };

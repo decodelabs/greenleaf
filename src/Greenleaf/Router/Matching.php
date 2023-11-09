@@ -24,7 +24,7 @@ class Matching implements Router
     /**
      * Find route for request
      */
-    public function routeIn(
+    public function matchIn(
         Request $request
     ): ?Hit {
         $method = $request->getMethod();
@@ -45,7 +45,7 @@ class Matching implements Router
      *
      * @param array<string, string|Stringable|int|float|null> $params
      */
-    public function routeOut(
+    public function matchOut(
         string|LeafUrl $uri,
         ?array $params = null
     ): ?Hit {

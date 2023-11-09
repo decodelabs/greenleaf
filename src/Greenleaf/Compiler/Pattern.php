@@ -9,17 +9,15 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Compiler;
 
+use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Dumpable;
+use DecodeLabs\Greenleaf\Route;
 use Stringable;
 
 class Pattern implements Stringable, Dumpable
 {
     protected string $pattern;
 
-    /**
-     * @var array<Segment>
-     */
-    protected array $segments;
 
     /**
      * Init with pattern
@@ -42,23 +40,6 @@ class Pattern implements Stringable, Dumpable
     }
 
 
-    /**
-     * Parse pattern
-     */
-    protected function parse(): void
-    {
-        $this->segments = [];
-
-        if ($this->pattern === '/') {
-            return;
-        }
-
-        $segments = explode('/', ltrim($this->pattern, '/'));
-
-        foreach ($segments as $i => $segment) {
-            $this->segments[$i] = Segment::fromString($i, $segment);
-        }
-    }
 
 
     /**
@@ -66,30 +47,34 @@ class Pattern implements Stringable, Dumpable
      *
      * @return array<Segment>
      */
-    public function getSegments(): array
-    {
-        if (!isset($this->segments)) {
-            $this->parse();
+    public function parseSegments(
+        ?Route $route = null
+    ): array {
+        if ($this->pattern === '/') {
+            return [];
         }
 
-        return $this->segments;
-    }
+        $segments = explode('/', ltrim($this->pattern, '/'));
 
-    /**
-     * Get parameters
-     *
-     * @return array<string>
-     */
-    public function getParameters(): array
-    {
-        $output = [];
+        foreach ($segments as $i => $segment) {
+            $segments[$i] = $segment = Segment::fromString($i, $segment, $route);
 
-        foreach ($this->getSegments() as $segment) {
-            $output = array_merge($output, $segment->getParameterNames());
+            if (
+                $segment->isMultiSegment() &&
+                isset($segments[$i + 1])
+            ) {
+                throw Exceptional::UnexpectedValue(
+                    'Multi-segment parameters must be the last segment in a pattern'
+                );
+            }
         }
 
-        return $output;
+        /**
+         * @var array<Segment>
+         */
+        return $segments;
     }
+
 
     /**
      * Convert to string
@@ -107,12 +92,8 @@ class Pattern implements Stringable, Dumpable
     {
         yield 'text' => $this->pattern;
 
-        if (!isset($this->segments)) {
-            $this->parse();
-        }
-
         yield 'meta' => [
-            'segments' => $this->segments
+            'segments' => $this->parseSegments()
         ];
     }
 }

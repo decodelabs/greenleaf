@@ -159,10 +159,17 @@ trait RouteTrait
             return null;
         }
 
-        $parts = explode('/', ltrim($uri->getPath(), '/'));
+        $path = ltrim($uri->getPath(), '/');
+
+        if ($path === '') {
+            $parts = [];
+        } else {
+            $parts = explode('/', $path);
+        }
+
         $parameters = [];
 
-        foreach ($this->pattern->getSegments() as $i => $segment) {
+        foreach ($this->pattern->parseSegments($this) as $i => $segment) {
             if (!isset($parts[$i])) {
                 if (!$segment->isWholeParameter()) {
                     return null;
@@ -181,13 +188,19 @@ trait RouteTrait
                 continue;
             }
 
-            if (!$params = $segment->match($this, $parts[$i])) {
+            if ($segment->isMultiSegment()) {
+                $part = implode('/', $parts);
+                $parts = [];
+            } else {
+                $part = $parts[$i];
+                unset($parts[$i]);
+            }
+
+            if (null === ($params = $segment->match($part))) {
                 return null;
             }
 
             $parameters = array_merge($parameters, $params);
-
-            unset($parts[$i]);
         }
 
         if (!empty($parts)) {
@@ -216,6 +229,7 @@ trait RouteTrait
         string|LeafUrl $uri,
         ?array $params = null
     ): ?Hit {
-        dd($uri, $params, $this);
+        // Only Uri base routes can match out
+        return null;
     }
 }
