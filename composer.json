@@ -17,6 +17,7 @@
         "decodelabs/glitch-support": "^0.4.5",
         "decodelabs/harvest": "^0.2.4",
         "decodelabs/singularity": "^0.2.5",
+        "decodelabs/slingshot": "^0.1.1",
         "decodelabs/veneer": "^0.10.22",
 
         "psr/container": "^2.0",
