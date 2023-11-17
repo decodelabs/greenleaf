@@ -98,7 +98,7 @@ class Routes implements Generator
 
 ### Router
 
-When the Dispatcher runs, it loads an apprioprite Router to take care of matching the Request to the configured Routes.
+When the Dispatcher runs, it loads an appropriate Router to take care of matching the Request to the configured Routes.
 
 At this early stage, Greenleaf provides a reference Matching implementation that just brute forces its way through the list of Routes until it finds a match. This implementation is not optimised for speed and will be replaced shortly with a high performance compiled router system that will be able to handle thousands of routes with ease.
 
