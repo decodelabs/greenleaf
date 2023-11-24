@@ -29,6 +29,21 @@ trait ActionTrait
         $this->context = $context;
     }
 
+
+    /**
+     * Get middleware list
+     */
+    public function getMiddleware(): ?array
+    {
+        if (!defined('static::MIDDLEWARE')) {
+            return null;
+        }
+
+        return static::MIDDLEWARE;
+    }
+
+
+
     /**
      * Prepare slingshot
      */

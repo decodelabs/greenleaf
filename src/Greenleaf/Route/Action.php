@@ -15,6 +15,7 @@ use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
+use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -31,9 +32,13 @@ class Action implements Route
      */
     public function __construct(
         string|Pattern $pattern,
-        string|LeafUrl $target
+        string|LeafUrl|null $target
     ) {
         $this->pattern = $this->normalizePattern($pattern);
+
+        if ($target === null) {
+            $target = (string)$pattern;
+        }
 
         if (is_string($target)) {
             $target = LeafUrl::fromString($target);
@@ -61,6 +66,18 @@ class Action implements Route
     ): Response {
         $class = $context->archetype->resolve(ActionInterface::class, (string)$this->target);
         $action = new $class($context);
+
+        if (null !== ($middleware = $action->getMiddleware())) {
+            $dispatcher = new MiddlewareDispatcher();
+
+            $dispatcher->add(...$middleware);
+
+            $dispatcher->add(function ($request, $next) use ($action, $parameters) {
+                return $action->execute($request, $this->target, $parameters);
+            });
+
+            return $dispatcher->handle($request);
+        }
 
         return $action->execute($request, $this->target, $parameters);
     }
