@@ -56,6 +56,7 @@ trait ActionTrait
             container: $this->context->container
         );
 
+        $output->addParameters($request->getAttributes());
         $output->addParameters($request->getQueryParams());
         $output->addParameters($url->parseQuery()->toArray());
         $output->addParameters($parameters);

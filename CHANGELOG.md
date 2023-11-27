@@ -1,4 +1,5 @@
 * Added Middleware support to Actions
+* Use request attributes in Action Slingshot
 * Switched to Slingshot for invocation
 * Updated Dictum dependency
 
