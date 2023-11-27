@@ -39,12 +39,11 @@ trait ByMethodTrait
 
         $method = strtolower($method);
 
-        return $this->{$method}(...$this->prepareMethodParameters(
-            method: $method,
+        return $this->prepareSlingshot(
             parameters: $parameters,
             url: $url,
             request: $request
-        ));
+        )->invoke([$this, $method]);
     }
 
     /**

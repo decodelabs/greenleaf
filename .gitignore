@@ -6,3 +6,6 @@ Thumbs.db
 /phpunit.xml
 /.idea
 /.env
+
+# remove when ready
+/examples

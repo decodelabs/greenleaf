@@ -53,7 +53,7 @@ class Leaf implements
             $host !== '' &&
             !str_starts_with($host, '~')
         ) {
-            $path = $host . '/' . $path;
+            $path = $host . $path;
             $host = null;
         }
 

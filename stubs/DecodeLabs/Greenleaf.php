@@ -44,7 +44,7 @@ class Greenleaf implements Proxy
     public static function createUrl(Ref3|string $uri, ?array $params = NULL): Ref4 {
         return static::$instance->createUrl(...func_get_args());
     }
-    public static function route(string $pattern, string $target, ?Ref5 $setup = NULL): Ref6 {
+    public static function route(string $pattern, ?string $target = NULL, ?Ref5 $setup = NULL): Ref6 {
         return static::$instance->route(...func_get_args());
     }
     public static function redirect(string $pattern, string $target, ?Ref5 $setup = NULL): Ref7 {

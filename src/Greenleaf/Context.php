@@ -242,7 +242,7 @@ class Context
      */
     public function route(
         string $pattern,
-        string $target,
+        ?string $target = null,
         ?Closure $setup = null
     ): ActionRoute {
         $output = new ActionRoute($pattern, $target);
