@@ -32,11 +32,13 @@
     },
     "autoload": {
         "psr-4": {
-            "DecodeLabs\\Greenleaf\\": "src/Greenleaf/",
-            "DecodeLabs\\Archetype\\Resolver\\": "src/Archetype/Resolver/",
-            "DecodeLabs\\Harvest\\Middleware\\": "src/Harvest/Middleware/",
-            "DecodeLabs\\Singularity\\Url\\": "src/Singularity/Url/"
+            "DecodeLabs\\Greenleaf\\": "src/Greenleaf/"
         },
+        "classmap": [
+            "src/Archetype/",
+            "src/Harvest/",
+            "src/Singularity/"
+        ],
         "files": [
             "src/Greenleaf/Context.php"
         ]
