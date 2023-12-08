@@ -27,8 +27,12 @@
     },
     "require-dev": {
         "decodelabs/glitch": "^0.18.9",
+        "decodelabs/guidance": "^0.1.8",
         "decodelabs/pandora": "^0.2.12",
         "decodelabs/phpstan-decodelabs": "^0.6.7"
+    },
+    "suggest": {
+        "decodelabs/guidance": "Uuid route support"
     },
     "autoload": {
         "psr-4": {

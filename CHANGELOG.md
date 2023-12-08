@@ -1,3 +1,5 @@
+* Added Uuid Validator
+
 ## v0.1.1 (2023-11-27)
 * Added Middleware support to Actions
 * Use request attributes in Action Slingshot
