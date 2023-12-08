@@ -1,3 +1,8 @@
+## v0.1.2 (2023-12-08)
+* Added Exception handling to Actions
+* Added Uuid Validator
+* Added OPTIONS request check in matcher
+
 ## v0.1.1 (2023-11-27)
 * Added Middleware support to Actions
 * Use request attributes in Action Slingshot
