@@ -9,9 +9,8 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
 
-use DecodeLabs\Dictum;
-use DecodeLabs\Guidance;
 use DecodeLabs\Greenleaf\Compiler\Parameter\ValidatorAbstract;
+use DecodeLabs\Guidance;
 
 class Uuid extends ValidatorAbstract
 {
@@ -25,7 +24,7 @@ class Uuid extends ValidatorAbstract
     public function validate(
         ?string $value
     ): bool {
-        if(class_exists(Guidance::class)) {
+        if (class_exists(Guidance::class)) {
             return Guidance::isValid($value);
         }
 
@@ -35,7 +34,11 @@ class Uuid extends ValidatorAbstract
     public function resolve(
         ?string $value
     ): mixed {
-        if(class_exists(Guidance::class)) {
+        if ($value === null) {
+            return null;
+        }
+
+        if (class_exists(Guidance::class)) {
             return Guidance::from($value);
         }
 

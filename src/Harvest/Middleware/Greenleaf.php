@@ -36,7 +36,7 @@ class Greenleaf implements
     public function handle(
         Request $request
     ): Response {
-        if($request->getMethod() === 'OPTIONS') {
+        if ($request->getMethod() === 'OPTIONS') {
             return Harvest::text('', 200, [
                 'allow' => 'OPTIONS, GET, HEAD, POST'
             ]);
@@ -59,7 +59,7 @@ class Greenleaf implements
         Handler $next
     ): Response {
         try {
-            if($request->getMethod() === 'OPTIONS') {
+            if ($request->getMethod() === 'OPTIONS') {
                 return Harvest::text('', 200, [
                     'allow' => 'OPTIONS, GET, HEAD, POST'
                 ]);

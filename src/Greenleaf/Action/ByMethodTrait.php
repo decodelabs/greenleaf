@@ -46,7 +46,7 @@ trait ByMethodTrait
                 url: $url,
                 request: $request
             )->invoke([$this, $method]);
-        } catch(Throwable $e) {
+        } catch (Throwable $e) {
             return $this->handleException($e, $request);
         }
     }

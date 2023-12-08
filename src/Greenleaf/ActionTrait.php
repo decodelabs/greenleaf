@@ -95,7 +95,7 @@ trait ActionTrait
         Throwable $e,
         Request $request
     ): Response {
-        if($request->getHeaderLine('Accept') === 'application/json') {
+        if ($request->getHeaderLine('Accept') === 'application/json') {
             GlitchProxy::logException($e);
 
             return Harvest::json([
