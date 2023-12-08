@@ -1,3 +1,4 @@
+## v0.1.2 (2023-12-08)
 * Added Exception handling to Actions
 * Added Uuid Validator
 * Added OPTIONS request check in matcher
