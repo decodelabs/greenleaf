@@ -14,6 +14,7 @@ use DecodeLabs\Harvest;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Throwable;
 
 trait ByMethodTrait
 {
@@ -39,11 +40,15 @@ trait ByMethodTrait
 
         $method = strtolower($method);
 
-        return $this->prepareSlingshot(
-            parameters: $parameters,
-            url: $url,
-            request: $request
-        )->invoke([$this, $method]);
+        try {
+            return $this->prepareSlingshot(
+                parameters: $parameters,
+                url: $url,
+                request: $request
+            )->invoke([$this, $method]);
+        } catch(Throwable $e) {
+            return $this->handleException($e, $request);
+        }
     }
 
     /**

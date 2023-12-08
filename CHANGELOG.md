@@ -1,3 +1,4 @@
+* Added Exception handling to Actions
 * Added Uuid Validator
 * Added OPTIONS request check in matcher
 
