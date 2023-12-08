@@ -1,4 +1,5 @@
 * Added Uuid Validator
+* Added OPTIONS request check in matcher
 
 ## v0.1.1 (2023-11-27)
 * Added Middleware support to Actions

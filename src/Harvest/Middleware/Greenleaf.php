@@ -12,6 +12,7 @@ namespace DecodeLabs\Harvest\Middleware;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Dispatcher;
 use DecodeLabs\Greenleaf\RouteNotFoundException;
+use DecodeLabs\Harvest;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -35,6 +36,12 @@ class Greenleaf implements
     public function handle(
         Request $request
     ): Response {
+        if($request->getMethod() === 'OPTIONS') {
+            return Harvest::text('', 200, [
+                'allow' => 'OPTIONS, GET, HEAD, POST'
+            ]);
+        }
+
         $hit = $this->context->matchIn($request, true);
 
         return $hit->getRoute()->handleIn(
@@ -52,6 +59,12 @@ class Greenleaf implements
         Handler $next
     ): Response {
         try {
+            if($request->getMethod() === 'OPTIONS') {
+                return Harvest::text('', 200, [
+                    'allow' => 'OPTIONS, GET, HEAD, POST'
+                ]);
+            }
+
             $hit = $this->context->matchIn($request, true);
 
             return $hit->getRoute()->handleIn(
