@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Proxy as GlitchProxy;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
@@ -98,10 +99,18 @@ trait ActionTrait
         if ($request->getHeaderLine('Accept') === 'application/json') {
             GlitchProxy::logException($e);
 
+            if ($e instanceof Exceptional\Exception) {
+                $code = $e->getHttpStatus() ?? 500;
+                $data = $e->getData();
+            } else {
+                $code = 500;
+                $data = null;
+            }
+
             return Harvest::json([
                 'error' => $e->getMessage(),
-                'code' => $e->getCode()
-            ], 500);
+                'data' => $data
+            ], $code);
         }
 
         throw $e;

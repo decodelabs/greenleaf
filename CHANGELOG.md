@@ -1,3 +1,6 @@
+## v0.1.3 (2023-12-11)
+* Improved JSON error handling
+
 ## v0.1.2 (2023-12-08)
 * Added Exception handling to Actions
 * Added Uuid Validator
