@@ -96,7 +96,10 @@ trait ActionTrait
         Throwable $e,
         Request $request
     ): Response {
-        if ($request->getHeaderLine('Accept') === 'application/json') {
+        if (
+            $request->getHeaderLine('Accept') === 'application/json' ||
+            $this->getDefaultContentType() === 'application/json'
+        ) {
             GlitchProxy::logException($e);
 
             if ($e instanceof Exceptional\Exception) {
@@ -114,5 +117,20 @@ trait ActionTrait
         }
 
         throw $e;
+    }
+
+    /**
+     * Get default content type
+     */
+    protected function getDefaultContentType(): string
+    {
+        if (
+            defined('static::CONTENT_TYPE') &&
+            is_string(static::CONTENT_TYPE)
+        ) {
+            return static::CONTENT_TYPE;
+        }
+
+        return 'text/html';
     }
 }

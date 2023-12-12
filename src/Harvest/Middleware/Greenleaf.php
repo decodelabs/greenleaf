@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Harvest\Middleware;
 
+use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Dispatcher;
 use DecodeLabs\Greenleaf\RouteNotFoundException;
@@ -35,7 +36,7 @@ class Greenleaf implements
     public function handle(
         Request $request
     ): Response {
-        $hit = $this->context->matchIn($request, true);
+        $hit = $this->getHit($request);
 
         return $hit->getRoute()->handleIn(
             $this->context,
@@ -52,7 +53,7 @@ class Greenleaf implements
         Handler $next
     ): Response {
         try {
-            $hit = $this->context->matchIn($request, true);
+            $hit = $this->getHit($request);
 
             return $hit->getRoute()->handleIn(
                 $this->context,
@@ -62,5 +63,16 @@ class Greenleaf implements
         } catch (RouteNotFoundException $e) {
             return $next->handle($request);
         }
+    }
+
+    /**
+     * Perform routing
+     */
+    protected function getHit(
+        Request &$request
+    ): Hit {
+        $hit = $this->context->matchIn($request, true);
+        $request = $request->withAttribute('route', $hit->getRoute());
+        return $hit;
     }
 }

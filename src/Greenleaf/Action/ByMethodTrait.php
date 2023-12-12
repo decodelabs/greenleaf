@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\Action;
 
 use DecodeLabs\Greenleaf\ActionTrait;
+use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
@@ -32,11 +33,7 @@ trait ByMethodTrait
         $method = $request->getMethod();
 
         if (!method_exists($this, $method)) {
-            if ($method === 'HEAD') {
-                $method = 'GET';
-            } else {
-                return $this->handleUnknownMethod($method);
-            }
+            return $this->handleUnknownMethod($request);
         }
 
         $method = strtolower($method);
@@ -56,26 +53,34 @@ trait ByMethodTrait
     /**
      * Handle HTTP OPTIONS request
      */
-    public function options(): Response
-    {
-        return $this->handleUnknownMethod('OPTIONS');
+    public function options(
+        Request $request
+    ): Response {
+        return $this->handleUnknownMethod($request);
     }
 
     /**
      * Handle unknown HTTP method
      */
     protected function handleUnknownMethod(
-        string $method
+        Request $request
     ): Response {
+        $method = $request->getMethod();
         $methods = [];
+        $route = $request->getAttribute('route');
 
         foreach (HarvestRequest::METHODS as $testMethod) {
             if (
-                $testMethod === 'OPTIONS' ||
-                method_exists($this, strtolower($testMethod))
+                !method_exists($this, strtolower($testMethod)) ||
+                (
+                    $route instanceof Route &&
+                    !$route->acceptsMethod($testMethod)
+                )
             ) {
-                $methods[] = $testMethod;
+                continue;
             }
+
+            $methods[] = $testMethod;
         }
 
         return Harvest::text('', $method === 'OPTIONS' ? 200 : 405, [
