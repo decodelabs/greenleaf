@@ -1,3 +1,5 @@
+* Improved OPTIONS request handling
+
 ## v0.1.3 (2023-12-11)
 * Improved JSON error handling
 

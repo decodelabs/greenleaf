@@ -11,6 +11,7 @@ namespace DecodeLabs\Greenleaf\Action;
 
 use DecodeLabs\Greenleaf\ActionTrait;
 use DecodeLabs\Harvest;
+use DecodeLabs\Harvest\Request as HarvestRequest;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -51,6 +52,15 @@ trait ByMethodTrait
         }
     }
 
+
+    /**
+     * Handle HTTP OPTIONS request
+     */
+    public function options(): Response
+    {
+        return $this->handleUnknownMethod('OPTIONS');
+    }
+
     /**
      * Handle unknown HTTP method
      */
@@ -60,13 +70,17 @@ trait ByMethodTrait
         $methods = [];
 
         foreach (HarvestRequest::METHODS as $testMethod) {
-            if (method_exists($this, strtolower($testMethod))) {
+            if (
+                $testMethod === 'OPTIONS' ||
+                method_exists($this, strtolower($testMethod))
+            ) {
                 $methods[] = $testMethod;
             }
         }
 
         return Harvest::text('', $method === 'OPTIONS' ? 200 : 405, [
-            'allow' => implode(', ', $methods)
+            'Allow' => implode(', ', $methods),
+            'Access-Control-Allow-Methods' => implode(', ', $methods),
         ]);
     }
 }
