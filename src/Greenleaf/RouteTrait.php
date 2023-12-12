@@ -120,7 +120,7 @@ trait RouteTrait
             return true;
         }
 
-        return in_array(strtoupper($method), $this->methods);
+        return in_array(strtoupper($method), array_merge($this->methods, ['OPTIONS', 'HEAD']));
     }
 
     public function removeMethod(

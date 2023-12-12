@@ -1,3 +1,8 @@
+## v0.1.4 (2023-12-12)
+* Added JsonApi action type
+* Improved OPTIONS request handling
+* Added matching route to Request attributes
+
 ## v0.1.3 (2023-12-11)
 * Improved JSON error handling
 
