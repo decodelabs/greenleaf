@@ -1,3 +1,6 @@
+## v0.1.5 (2023-12-13)
+* Added number validator
+
 ## v0.1.4 (2023-12-12)
 * Added JsonApi action type
 * Improved OPTIONS request handling
