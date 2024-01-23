@@ -1,3 +1,6 @@
+## v0.1.6 (2024-01-23)
+* Added methodBy<parameter> Action signatures
+
 ## v0.1.5 (2023-12-13)
 * Added number validator
 
