@@ -1,3 +1,6 @@
+## v0.1.7 (2024-01-23)
+* Fixed CORS with methodBy<parameter> actions
+
 ## v0.1.6 (2024-01-23)
 * Added methodBy<parameter> Action signatures
 

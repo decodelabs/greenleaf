@@ -90,19 +90,31 @@ trait ByMethodTrait
         $method = $request->getMethod();
         $methods = [];
         $route = $request->getAttribute('route');
+        $functions = get_class_methods($this);
 
         foreach (HarvestRequest::METHODS as $testMethod) {
             if (
-                !method_exists($this, strtolower($testMethod)) ||
-                (
-                    $route instanceof Route &&
-                    !$route->acceptsMethod($testMethod)
-                )
+                $route instanceof Route &&
+                !$route->acceptsMethod($testMethod)
             ) {
                 continue;
             }
 
-            $methods[] = $testMethod;
+            $testMethodLower = strtolower($testMethod);
+
+            if (in_array($testMethodLower, $functions)) {
+                $methods[] = $testMethod;
+                continue;
+            }
+
+            foreach ($functions as $function) {
+                if (str_starts_with($function, $testMethodLower . 'By')) {
+                    continue;
+                }
+
+                $methods[] = $testMethod;
+                continue 2;
+            }
         }
 
         return Harvest::text('', $method === 'OPTIONS' ? 200 : 405, [
