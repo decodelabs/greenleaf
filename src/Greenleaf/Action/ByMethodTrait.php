@@ -30,13 +30,9 @@ trait ByMethodTrait
         LeafUrl $url,
         array $parameters
     ): Response {
-        $method = $request->getMethod();
-
-        if (!method_exists($this, $method)) {
+        if (!$method = $this->getMethod($request, $parameters)) {
             return $this->handleUnknownMethod($request);
         }
-
-        $method = strtolower($method);
 
         try {
             return $this->prepareSlingshot(
@@ -47,6 +43,32 @@ trait ByMethodTrait
         } catch (Throwable $e) {
             return $this->handleException($e, $request);
         }
+    }
+
+    protected function getMethod(
+        Request $request,
+        array $parameters
+    ): ?string {
+        $method = $request->getMethod();
+        $method = strtolower($method);
+
+        $keys = array_keys($parameters);
+
+        while (!empty($keys)) {
+            $function = $method . 'By' . implode('', array_map('ucfirst', $keys));
+
+            if (method_exists($this, $function)) {
+                return $function;
+            }
+
+            array_pop($keys);
+        }
+
+        if (method_exists($this, $method)) {
+            return $method;
+        }
+
+        return null;
     }
 
 
