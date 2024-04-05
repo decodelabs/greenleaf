@@ -11,6 +11,7 @@ namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Proxy as GlitchProxy;
+use DecodeLabs\Greenleaf\Attribute\Middleware;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
 use DecodeLabs\Pandora\Container as PandoraContainer;
@@ -19,6 +20,7 @@ use DecodeLabs\Slingshot;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use ReflectionClass;
 use Throwable;
 
 trait ActionTrait
@@ -40,11 +42,31 @@ trait ActionTrait
      */
     public function getMiddleware(): ?array
     {
-        if (!defined('static::MIDDLEWARE')) {
+        if (defined('static::MIDDLEWARE')) {
+            return static::MIDDLEWARE;
+        }
+
+        $ref = new ReflectionClass($this);
+        $attributes = $ref->getAttributes(Middleware::class);
+
+        if (empty($attributes)) {
             return null;
         }
 
-        return static::MIDDLEWARE;
+        $output = [];
+
+        foreach ($attributes as $attribute) {
+            $attribute = $attribute->newInstance();
+            $middleware = $attribute->getMiddleware();
+
+            if (is_string($middleware)) {
+                $output[$middleware] = $attribute->getParameters();
+            } else {
+                $output[] = $middleware;
+            }
+        }
+
+        return $output;
     }
 
 
