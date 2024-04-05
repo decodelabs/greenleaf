@@ -1,3 +1,5 @@
+* Support Attributes for defining Action Middleware
+
 ## v0.1.7 (2024-01-23)
 * Fixed CORS with methodBy<parameter> actions
 
