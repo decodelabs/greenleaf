@@ -11,7 +11,7 @@ namespace DecodeLabs\Greenleaf;
 
 use Closure;
 use DecodeLabs\Archetype\Handler as ArchetypeHandler;
-use DecodeLabs\Archetype\NamespaceMap;
+use DecodeLabs\Archetype\NamespaceList;
 use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf;
@@ -40,7 +40,7 @@ class Context
     ];
 
     #[Plugin]
-    public NamespaceMap $namespaces;
+    public NamespaceList $namespaces;
 
     #[Plugin]
     public ArchetypeHandler $archetype;
@@ -55,16 +55,16 @@ class Context
      * Init with namespace map
      */
     public function __construct(
-        ?NamespaceMap $namespaces = null,
+        ?NamespaceList $namespaces = null,
         ?Container $container = null
     ) {
-        $this->namespaces = $namespaces ?? new NamespaceMap();
+        $this->namespaces = $namespaces ?? new NamespaceList();
         $this->archetype = new ArchetypeHandler();
         $this->container = $container;
 
         foreach (self::ARCHETYPES as $interface => $options) {
             $options['interface'] = $interface;
-            $options['namespaces'] = $this->namespaces;
+            $options['namespaceList'] = $this->namespaces;
 
             $this->archetype->register(
                 /** @phpstan-ignore-next-line */

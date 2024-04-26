@@ -9,14 +9,16 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Archetype\Resolver;
 
-use DecodeLabs\Archetype\NamespaceMap;
-use DecodeLabs\Archetype\Scanner;
-use DecodeLabs\Archetype\ScannerTrait;
+use DecodeLabs\Archetype\NamespaceList;
+use DecodeLabs\Archetype\ResolverTrait;
+use DecodeLabs\Archetype\Resolver\Scanner;
+use DecodeLabs\Archetype\Resolver\ScannerTrait;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Generator;
 
 class Greenleaf implements Scanner
 {
+    use ResolverTrait;
     use ScannerTrait;
 
     /**
@@ -25,7 +27,7 @@ class Greenleaf implements Scanner
     protected string $interface;
     protected string $interfaceName;
 
-    protected NamespaceMap $namespaces;
+    protected NamespaceList $namespaceList;
     protected bool $named = false;
     protected bool $local = false;
 
@@ -36,14 +38,14 @@ class Greenleaf implements Scanner
      */
     public function __construct(
         string $interface,
-        NamespaceMap $namespaces,
+        NamespaceList $namespaceList,
         bool $named = false,
         bool $local = false
     ) {
         $this->interface = $interface;
         $parts = explode('\\', $interface);
         $this->interfaceName = (string)array_pop($parts);
-        $this->namespaces = $namespaces;
+        $this->namespaceList = $namespaceList;
         $this->named = $named;
         $this->local = $local;
     }
@@ -90,7 +92,7 @@ class Greenleaf implements Scanner
             $classes[] = $this->interface . '\\' . $name;
         }
 
-        foreach ($this->namespaces as $namespace) {
+        foreach ($this->namespaceList as $namespace) {
             $classes[] = $namespace . '\\' . $name;
         }
 
@@ -112,7 +114,7 @@ class Greenleaf implements Scanner
             yield from $this->scanNamespaceClasses($this->interface);
         }
 
-        foreach ($this->namespaces as $namespace) {
+        foreach ($this->namespaceList as $namespace) {
             yield from $this->scanNamespaceClasses($namespace, $this->interface);
         }
     }

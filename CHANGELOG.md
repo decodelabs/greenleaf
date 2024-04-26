@@ -1,3 +1,7 @@
+## v0.1.9 (2024-04-26)
+* Updated Archetype dependency
+* Updated dependency list
+
 ## v0.1.8 (2024-04-05)
 * Support Attributes for defining Action Middleware
 
