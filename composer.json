@@ -10,6 +10,7 @@
         } ],
     "require": {
         "php": "^8.1",
+
         "decodelabs/archetype": "^0.2.21",
         "decodelabs/coercion": "^0.2.7",
         "decodelabs/dictum": "^0.5.1|^0.6",
@@ -26,7 +27,6 @@
         "psr/http-server-middleware": "^1.0"
     },
     "require-dev": {
-        "decodelabs/glitch": "^0.18.9",
         "decodelabs/guidance": "^0.1.8",
         "decodelabs/pandora": "^0.2.12",
         "decodelabs/phpstan-decodelabs": "^0.6.7"
