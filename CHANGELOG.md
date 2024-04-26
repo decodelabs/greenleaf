@@ -1,3 +1,4 @@
+* Updated Archetype dependency
 * Updated dependency list
 
 ## v0.1.8 (2024-04-05)

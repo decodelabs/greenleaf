@@ -8,7 +8,7 @@ namespace DecodeLabs;
 use DecodeLabs\Veneer\Proxy as Proxy;
 use DecodeLabs\Veneer\ProxyTrait as ProxyTrait;
 use DecodeLabs\Greenleaf\Context as Inst;
-use DecodeLabs\Archetype\NamespaceMap as NamespacesPlugin;
+use DecodeLabs\Archetype\NamespaceList as NamespacesPlugin;
 use DecodeLabs\Archetype\Handler as ArchetypePlugin;
 use DecodeLabs\Greenleaf\Router as RouterPlugin;
 use DecodeLabs\Greenleaf\Dispatcher as Ref0;
