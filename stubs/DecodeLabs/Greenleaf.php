@@ -8,7 +8,6 @@ namespace DecodeLabs;
 use DecodeLabs\Veneer\Proxy as Proxy;
 use DecodeLabs\Veneer\ProxyTrait as ProxyTrait;
 use DecodeLabs\Greenleaf\Context as Inst;
-use DecodeLabs\Archetype\NamespaceList as NamespacesPlugin;
 use DecodeLabs\Archetype\Handler as ArchetypePlugin;
 use DecodeLabs\Greenleaf\Router as RouterPlugin;
 use DecodeLabs\Greenleaf\Dispatcher as Ref0;
@@ -28,7 +27,6 @@ class Greenleaf implements Proxy
     const VENEER_TARGET = Inst::class;
 
     public static Inst $instance;
-    public static NamespacesPlugin $namespaces;
     public static ArchetypePlugin $archetype;
     public static RouterPlugin $router;
 
