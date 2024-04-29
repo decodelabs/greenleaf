@@ -1,3 +1,6 @@
+## v0.2.0 (2024-04-29)
+* Simplified Archetype resolution
+
 ## v0.1.10 (2024-04-29)
 * Fixed Veneer stubs in gitattributes
 

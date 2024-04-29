@@ -19,7 +19,7 @@
         "decodelabs/harvest": "^0.2.4",
         "decodelabs/singularity": "^0.2.5",
         "decodelabs/slingshot": "^0.1.1",
-        "decodelabs/veneer": "^0.10.22",
+        "decodelabs/veneer": "^0.10.25",
 
         "psr/container": "^2.0",
         "psr/http-message": "^2.0",
@@ -49,7 +49,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-develop": "0.1.x-dev"
+            "dev-develop": "0.2.x-dev"
         }
     }
 }

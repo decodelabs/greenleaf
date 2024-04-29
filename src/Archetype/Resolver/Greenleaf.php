@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Archetype\Resolver;
 
-use DecodeLabs\Archetype\NamespaceList;
 use DecodeLabs\Archetype\ResolverTrait;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Generator;
@@ -25,7 +24,6 @@ class Greenleaf implements Scanner
     protected string $interface;
     protected string $interfaceName;
 
-    protected NamespaceList $namespaceList;
     protected bool $named = false;
     protected bool $local = false;
 
@@ -36,14 +34,12 @@ class Greenleaf implements Scanner
      */
     public function __construct(
         string $interface,
-        NamespaceList $namespaceList,
         bool $named = false,
         bool $local = false
     ) {
         $this->interface = $interface;
         $parts = explode('\\', $interface);
         $this->interfaceName = (string)array_pop($parts);
-        $this->namespaceList = $namespaceList;
         $this->named = $named;
         $this->local = $local;
     }
@@ -77,24 +73,24 @@ class Greenleaf implements Scanner
         }
 
         $name = trim($name, '\\');
-        $classes = [];
 
         if ($this->named) {
             $name .= $this->interfaceName;
         }
 
-        if (
-            $this->local &&
-            !str_contains($name, '\\')
-        ) {
-            $classes[] = $this->interface . '\\' . $name;
-        }
+        foreach ($this->namespaces->map(
+            namespace: $this->interface,
+            includeRoot: $this->local
+        ) as $namespace) {
+            if (
+                $namespace === $this->interface &&
+                !$this->local
+            ) {
+                continue;
+            }
 
-        foreach ($this->namespaceList as $namespace) {
-            $classes[] = $namespace . '\\' . $name;
-        }
+            $class = $namespace . '\\' . $name;
 
-        foreach (array_reverse($classes) as $class) {
             if (class_exists($class)) {
                 return $class;
             }
@@ -108,11 +104,7 @@ class Greenleaf implements Scanner
      */
     public function scanClasses(): Generator
     {
-        if ($this->local) {
-            yield from $this->scanNamespaceClasses($this->interface);
-        }
-
-        foreach ($this->namespaceList as $namespace) {
+        foreach ($this->namespaces->map($this->interface, $this->local) as $namespace) {
             yield from $this->scanNamespaceClasses($namespace, $this->interface);
         }
     }
