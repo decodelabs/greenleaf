@@ -11,8 +11,6 @@ namespace DecodeLabs\Archetype\Resolver;
 
 use DecodeLabs\Archetype\NamespaceList;
 use DecodeLabs\Archetype\ResolverTrait;
-use DecodeLabs\Archetype\Resolver\Scanner;
-use DecodeLabs\Archetype\Resolver\ScannerTrait;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Generator;
 
