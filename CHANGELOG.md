@@ -1,3 +1,5 @@
+* Updated Veneer dependency
+
 ## v0.2.0 (2024-04-29)
 * Simplified Archetype resolution
 
