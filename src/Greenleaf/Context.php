@@ -24,13 +24,11 @@ use DecodeLabs\Singularity\Url;
 use DecodeLabs\Singularity\Url\Http as HttpUrl;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Veneer;
-use DecodeLabs\Veneer\LazyLoad;
 use DecodeLabs\Veneer\Plugin;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
 
-#[LazyLoad]
 class Context
 {
     protected const ARCHETYPES = [
