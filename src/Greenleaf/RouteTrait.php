@@ -17,6 +17,9 @@ use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\UriInterface as Uri;
 use Stringable;
 
+/**
+ * @phpstan-require-implements Route
+ */
 trait RouteTrait
 {
     protected Pattern $pattern;

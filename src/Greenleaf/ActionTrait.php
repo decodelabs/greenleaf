@@ -23,6 +23,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use ReflectionClass;
 use Throwable;
 
+/**
+ * @phpstan-require-implements Action
+ */
 trait ActionTrait
 {
     protected Context $context;
