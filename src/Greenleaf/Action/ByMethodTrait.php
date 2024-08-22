@@ -92,7 +92,7 @@ trait ByMethodTrait
         $route = $request->getAttribute('route');
         $functions = get_class_methods($this);
 
-        foreach (HarvestRequest::METHODS as $testMethod) {
+        foreach (HarvestRequest::Methods as $testMethod) {
             if (
                 $route instanceof Route &&
                 !$route->acceptsMethod($testMethod)

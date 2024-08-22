@@ -24,16 +24,14 @@ use DecodeLabs\Singularity\Url;
 use DecodeLabs\Singularity\Url\Http as HttpUrl;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Veneer;
-use DecodeLabs\Veneer\LazyLoad;
 use DecodeLabs\Veneer\Plugin;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
 
-#[LazyLoad]
 class Context
 {
-    protected const ARCHETYPES = [
+    protected const Archetypes = [
         Generator::class => [],
         Action::class => ['named' => true],
     ];
@@ -57,7 +55,7 @@ class Context
         $this->archetype = $archetype ?? new ArchetypeHandler();
         $this->container = $container;
 
-        foreach (self::ARCHETYPES as $interface => $options) {
+        foreach (self::Archetypes as $interface => $options) {
             $options['interface'] = $interface;
 
             $this->archetype->register(
