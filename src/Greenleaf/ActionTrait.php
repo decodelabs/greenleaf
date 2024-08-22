@@ -42,8 +42,8 @@ trait ActionTrait
      */
     public function getMiddleware(): ?array
     {
-        if (defined('static::MIDDLEWARE')) {
-            return static::MIDDLEWARE;
+        if (defined('static::Middleware')) {
+            return static::Middleware;
         }
 
         $ref = new ReflectionClass($this);
@@ -147,10 +147,10 @@ trait ActionTrait
     protected function getDefaultContentType(): string
     {
         if (
-            defined('static::CONTENT_TYPE') &&
-            is_string(static::CONTENT_TYPE)
+            defined('static::ContentType') &&
+            is_string(static::ContentType)
         ) {
-            return static::CONTENT_TYPE;
+            return static::ContentType;
         }
 
         return 'text/html';

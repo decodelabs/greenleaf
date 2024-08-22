@@ -31,7 +31,7 @@ use Stringable;
 
 class Context
 {
-    protected const ARCHETYPES = [
+    protected const Archetypes = [
         Generator::class => [],
         Action::class => ['named' => true],
     ];
@@ -55,7 +55,7 @@ class Context
         $this->archetype = $archetype ?? new ArchetypeHandler();
         $this->container = $container;
 
-        foreach (self::ARCHETYPES as $interface => $options) {
+        foreach (self::Archetypes as $interface => $options) {
             $options['interface'] = $interface;
 
             $this->archetype->register(
