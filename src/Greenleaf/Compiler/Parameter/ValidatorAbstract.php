@@ -47,7 +47,7 @@ abstract class ValidatorAbstract implements Validator
 
         // Regex
         if (preg_match('|^/.+/([a-z]+)?$|', $input, $matches)) {
-            $setup['pattern'] = $matches[1];
+            $setup['pattern'] = $matches[1] ?? null;
         }
 
         // Type
