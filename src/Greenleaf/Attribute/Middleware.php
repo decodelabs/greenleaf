@@ -21,12 +21,15 @@ use Psr\Http\Server\RequestHandlerInterface as PsrHandler;
 )]
 class Middleware
 {
-    protected string|PsrMiddleware|Closure $middleware;
+    /**
+     * @var string|class-string<PsrMiddleware>|PsrMiddleware|Closure(PsrRequest,PsrHandler):PsrResponse
+     */
+    protected(set) string|PsrMiddleware|Closure $middleware;
 
     /**
-     * @var array<string, mixed>
+     * @var array<string,mixed>
      */
-    protected array $parameters;
+    protected(set) array $parameters;
 
     /**
      * @param string|class-string<PsrMiddleware>|PsrMiddleware|Closure(PsrRequest, PsrHandler):PsrResponse $middleware
@@ -38,25 +41,5 @@ class Middleware
     ) {
         $this->middleware = $middleware;
         $this->parameters = $parameters;
-    }
-
-    /**
-     * Get middleware
-     *
-     * @return string|class-string<PsrMiddleware>|PsrMiddleware|Closure(PsrRequest, PsrHandler):PsrResponse
-     */
-    public function getMiddleware(): string|PsrMiddleware|Closure
-    {
-        return $this->middleware;
-    }
-
-    /**
-     * Get parameters
-     *
-     * @return array<string, mixed>
-     */
-    public function getParameters(): array
-    {
-        return $this->parameters;
     }
 }

@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+/**
+ * @phpstan-require-implements Generator
+ */
 trait GeneratorTrait
 {
     protected Context $context;

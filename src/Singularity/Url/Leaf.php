@@ -27,7 +27,7 @@ class Leaf implements
     use QueryTrait;
     use FragmentTrait;
 
-    protected string $area;
+    protected(set) string $area;
 
     /**
      * Parse string
@@ -39,9 +39,8 @@ class Leaf implements
 
         if ($parts === false) {
             throw Exceptional::InvalidArgument(
-                'Unable to parse uri: ' . $uri,
-                null,
-                $uri
+                message: 'Unable to parse uri: ' . $uri,
+                data: $uri
             );
         }
 

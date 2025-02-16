@@ -59,7 +59,6 @@ class Context
             $options['interface'] = $interface;
 
             $this->archetype->register(
-                /** @phpstan-ignore-next-line */
                 new GreenleafResolver(...$options),
                 unique: true
             );
@@ -128,7 +127,7 @@ class Context
             }
 
             throw Exceptional::RouteNotFound(
-                'Route not found: ' . $request->getUri()->getPath()
+                message: 'Route not found: ' . $request->getUri()->getPath()
             );
         }
 
@@ -178,7 +177,7 @@ class Context
 
         if (!$hit = $this->router->matchOut($uri, $params)) {
             throw Exceptional::RouteNotMatched(
-                'Unable to match uri to route'
+                message: 'Unable to match uri to route'
             );
         }
 
@@ -202,14 +201,14 @@ class Context
 
         if (!$hit = $this->router->matchOut($uri, $params)) {
             throw Exceptional::RouteNotMatched(
-                'Unable to match uri to route'
+                message: 'Unable to match uri to route'
             );
         }
 
         $route = $hit->getRoute();
         /** @var array<string, string|Stringable|float|int|null> */
-        $params = $hit->getParameters();
-        $segments = $route->getPattern()->parseSegments();
+        $params = $hit->parameters;
+        $segments = $route->pattern->parseSegments();
 
         foreach ($segments as $i => $segment) {
             $segments[$i] = $segment->resolve($params);
@@ -266,7 +265,7 @@ class Context
 
 
 // Veneer
-Veneer::register(
+Veneer\Manager::getGlobalManager()->register(
     Context::class,
-    Greenleaf::class // @phpstan-ignore-line
+    Greenleaf::class
 );

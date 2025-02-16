@@ -17,19 +17,26 @@ use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\UriInterface as Uri;
 use Stringable;
 
+/**
+ * @phpstan-require-implements Route
+ */
 trait RouteTrait
 {
-    protected Pattern $pattern;
+    protected(set) Pattern $pattern;
 
     /**
-     * @var array<string, Parameter>
+     * @var array<string,Parameter>
      */
-    protected array $parameters = [];
+    protected(set) array $parameters = [];
 
     /**
      * @var array<string>
      */
-    protected array $methods = [];
+    protected(set) array $methods = [] {
+        get {
+            return $this->methods;
+        }
+    }
 
     /**
      * Normalize pattern
@@ -43,12 +50,6 @@ trait RouteTrait
 
         return $pattern;
     }
-
-    public function getPattern(): Pattern
-    {
-        return $this->pattern;
-    }
-
 
     public function with(
         string $name,
@@ -87,14 +88,6 @@ trait RouteTrait
     ): static {
         unset($this->parameters[$name]);
         return $this;
-    }
-
-    /**
-     * @return array<string, Parameter>
-     */
-    public function getParameters(): array
-    {
-        return $this->parameters;
     }
 
 
@@ -136,19 +129,6 @@ trait RouteTrait
 
         return $this;
     }
-
-    /**
-     * @return array<string>|null
-     */
-    public function getMethods(): ?array
-    {
-        if (empty($this->methods)) {
-            return null;
-        }
-
-        return $this->methods;
-    }
-
 
 
     public function matchIn(
@@ -219,11 +199,12 @@ trait RouteTrait
             $parameters[$name] = $this->parameters[$name]->resolve($value);
         }
 
+        /** @var array<string,mixed> $parameters */
         return new Hit($this, $parameters);
     }
 
     /**
-     * @param array<string, string|Stringable|int|float|null> $params
+     * @param array<string,string|Stringable|int|float|null> $params
      */
     public function matchOut(
         string|LeafUrl $uri,

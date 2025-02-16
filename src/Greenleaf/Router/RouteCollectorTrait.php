@@ -36,7 +36,7 @@ trait RouteCollectorTrait
             if ($route instanceof RouteGenerator) {
                 yield from $this->scanRoutes($route);
             } else {
-                yield (string)$route->getPattern() => $route;
+                yield (string)$route->pattern => $route;
             }
         }
     }

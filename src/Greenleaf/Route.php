@@ -21,7 +21,17 @@ use Stringable;
 
 interface Route
 {
-    public function getPattern(): Pattern;
+    public Pattern $pattern { get; }
+
+    /**
+     * @var array<string,Parameter>
+     */
+    public array $parameters { get; }
+
+    /**
+     * @var array<string>
+     */
+    public array $methods { get; }
 
     /**
      * @param string|array<string, mixed>|Validator|null $validate
@@ -52,11 +62,6 @@ interface Route
         string $name
     ): static;
 
-    /**
-     * @return array<string, Parameter>
-     */
-    public function getParameters(): array;
-
 
     public function forMethod(
         string ...$method
@@ -73,11 +78,6 @@ interface Route
     public function removeMethod(
         string $method
     ): static;
-
-    /**
-     * @return array<string>|null
-     */
-    public function getMethods(): ?array;
 
 
 

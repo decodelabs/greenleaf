@@ -18,6 +18,11 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
 
 interface Action
 {
+    /**
+     * @var array<string|class-string<Middleware>>
+     */
+    public const array Middleware = [];
+
     public function __construct(
         Context $context
     );
@@ -25,7 +30,7 @@ interface Action
     /**
      * Get middleware list
      *
-     * @return array<string|class-string<Middleware>|Middleware|Closure(Request, Handler):Response>
+     * @return array<string|class-string<Middleware>|Middleware|Closure(Request,Handler):Response>
      */
     public function getMiddleware(): ?array;
 

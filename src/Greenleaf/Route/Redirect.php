@@ -122,7 +122,6 @@ class Redirect implements Route
                     }
                 }
             } else {
-                /** @var iterable<int|string, string|int|float|null> $query */
                 $current->merge($query);
                 $query = $current;
             }

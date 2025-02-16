@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Action;
 
+use Closure;
 use DecodeLabs\Greenleaf\ActionTrait;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Harvest;
@@ -35,16 +36,27 @@ trait ByMethodTrait
         }
 
         try {
-            return $this->prepareSlingshot(
+            /**
+             * @var Closure():Response $callback
+             */
+            $callback = $this->{$method}(...);
+
+            /** @var Response $output */
+            $output = $this->prepareSlingshot(
                 parameters: $parameters,
                 url: $url,
                 request: $request
-            )->invoke([$this, $method]);
+            )->invoke($callback);
+
+            return $output;
         } catch (Throwable $e) {
             return $this->handleException($e, $request);
         }
     }
 
+    /**
+     * @param array<string,mixed> $parameters
+     */
     protected function getMethod(
         Request $request,
         array $parameters
