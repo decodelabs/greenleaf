@@ -10,6 +10,7 @@ use DecodeLabs\Veneer\ProxyTrait as ProxyTrait;
 use DecodeLabs\Greenleaf\Context as Inst;
 use DecodeLabs\Archetype\Handler as ArchetypePlugin;
 use DecodeLabs\Greenleaf\Router as RouterPlugin;
+use DecodeLabs\Veneer\Plugin\Wrapper as PluginWrapper;
 use DecodeLabs\Greenleaf\Dispatcher as Ref0;
 use Psr\Http\Message\ServerRequestInterface as Ref1;
 use DecodeLabs\Greenleaf\Compiler\Hit as Ref2;
@@ -23,29 +24,30 @@ class Greenleaf implements Proxy
 {
     use ProxyTrait;
 
-    const Veneer = 'DecodeLabs\\Greenleaf';
-    const VeneerTarget = Inst::class;
+    public const Veneer = 'DecodeLabs\\Greenleaf';
+    public const VeneerTarget = Inst::class;
 
-    public static Inst $instance;
+    protected static Inst $_veneerInstance;
     public static ArchetypePlugin $archetype;
-    public static RouterPlugin $router;
+    /** @var RouterPlugin|PluginWrapper<RouterPlugin> $router */
+    public static RouterPlugin|PluginWrapper $router;
 
     public static function createDispatcher(): Ref0 {
-        return static::$instance->createDispatcher();
+        return static::$_veneerInstance->createDispatcher();
     }
     public static function matchIn(Ref1 $request, bool $checkDir = false): Ref2 {
-        return static::$instance->matchIn(...func_get_args());
+        return static::$_veneerInstance->matchIn(...func_get_args());
     }
     public static function matchOut(Ref3|string $uri, ?array $params = NULL): Ref2 {
-        return static::$instance->matchOut(...func_get_args());
+        return static::$_veneerInstance->matchOut(...func_get_args());
     }
     public static function createUrl(Ref3|string $uri, ?array $params = NULL): Ref4 {
-        return static::$instance->createUrl(...func_get_args());
+        return static::$_veneerInstance->createUrl(...func_get_args());
     }
     public static function route(string $pattern, ?string $target = NULL, ?Ref5 $setup = NULL): Ref6 {
-        return static::$instance->route(...func_get_args());
+        return static::$_veneerInstance->route(...func_get_args());
     }
     public static function redirect(string $pattern, string $target, ?Ref5 $setup = NULL): Ref7 {
-        return static::$instance->redirect(...func_get_args());
+        return static::$_veneerInstance->redirect(...func_get_args());
     }
 };

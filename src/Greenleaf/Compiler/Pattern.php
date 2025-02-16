@@ -64,7 +64,7 @@ class Pattern implements Stringable, Dumpable
                 isset($segments[$i + 1])
             ) {
                 throw Exceptional::UnexpectedValue(
-                    'Multi-segment parameters must be the last segment in a pattern'
+                    message: 'Multi-segment parameters must be the last segment in a pattern'
                 );
             }
         }

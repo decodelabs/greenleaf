@@ -41,7 +41,7 @@ class Greenleaf implements
         return $hit->getRoute()->handleIn(
             $this->context,
             $request,
-            $hit->getParameters()
+            $hit->parameters
         );
     }
 
@@ -58,7 +58,7 @@ class Greenleaf implements
             return $hit->getRoute()->handleIn(
                 $this->context,
                 $request,
-                $hit->getParameters()
+                $hit->parameters
             );
         } catch (RouteNotFoundException $e) {
             return $next->handle($request);

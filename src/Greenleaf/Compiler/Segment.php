@@ -41,7 +41,7 @@ class Segment implements Dumpable
 
         if ($tokens === false) {
             throw Exceptional::UnexpectedValue(
-                'Unable to parse segment: ' . $segment
+                message: 'Unable to parse segment: ' . $segment
             );
         }
 
@@ -182,7 +182,7 @@ class Segment implements Dumpable
 
             if (!isset($parameters[$name])) {
                 throw Exceptional::UnexpectedValue(
-                    'Missing parameter value: ' . $name
+                    message: 'Missing parameter value: ' . $name
                 );
             }
 

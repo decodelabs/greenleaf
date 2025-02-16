@@ -45,7 +45,7 @@ trait ActionTrait
      */
     public function getMiddleware(): ?array
     {
-        if (defined('static::Middleware')) {
+        if (!empty(static::Middleware)) {
             return static::Middleware;
         }
 
@@ -60,15 +60,16 @@ trait ActionTrait
 
         foreach ($attributes as $attribute) {
             $attribute = $attribute->newInstance();
-            $middleware = $attribute->getMiddleware();
+            $middleware = $attribute->middleware;
 
             if (is_string($middleware)) {
-                $output[$middleware] = $attribute->getParameters();
+                $output[$middleware] = $attribute->parameters;
             } else {
                 $output[] = $middleware;
             }
         }
 
+        // @phpstan-ignore-next-line
         return $output;
     }
 
@@ -76,6 +77,8 @@ trait ActionTrait
 
     /**
      * Prepare slingshot
+     *
+     * @param array<string,mixed> $parameters
      */
     protected function prepareSlingshot(
         array $parameters,
@@ -86,11 +89,19 @@ trait ActionTrait
             container: $this->context->container
         );
 
-        $output->addParameters($request->getAttributes());
-        $output->addParameters($request->getQueryParams());
-        $output->addParameters($url->parseQuery()->toArray());
+        /** @var array<string,mixed> */
+        $attributes = $request->getAttributes();
+        /** @var array<string,mixed> */
+        $queryParams = $request->getQueryParams();
+        /** @var array<string,mixed> */
+        $urlQuery = $url->parseQuery()->toArray();
+
+        $output->addParameters($attributes);
+        $output->addParameters($queryParams);
+        $output->addParameters($urlQuery);
         $output->addParameters($parameters);
 
+        // @phpstan-ignore-next-line
         $output->addTypes([
             LeafUrl::class => $url,
             Request::class => $request,
@@ -128,8 +139,8 @@ trait ActionTrait
             GlitchProxy::logException($e);
 
             if ($e instanceof Exceptional\Exception) {
-                $code = $e->getHttpStatus() ?? 500;
-                $data = $e->getData();
+                $code = $e->http ?? 500;
+                $data = $e->data;
             } else {
                 $code = 500;
                 $data = null;
