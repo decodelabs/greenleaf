@@ -31,6 +31,6 @@ class Number extends ValidatorAbstract
     public function resolve(
         ?string $value
     ): mixed {
-        return Coercion::toIntOrNull($value);
+        return Coercion::tryInt($value);
     }
 }

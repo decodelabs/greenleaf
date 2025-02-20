@@ -79,7 +79,7 @@ abstract class ValidatorAbstract implements Validator
 
         $class = Archetype::resolve(
             Validator::class,
-            ucfirst(Coercion::toString($type))
+            ucfirst(Coercion::asString($type))
         );
 
         return new $class(...$input);
