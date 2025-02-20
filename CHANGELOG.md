@@ -1,3 +1,6 @@
+## v0.4.1 (2025-02-20)
+* Upgraded Coercion dependency
+
 ## v0.4.0 (2025-02-16)
 * Replaced accessors with property hooks
 * Added @phpstan-require-implements constraints

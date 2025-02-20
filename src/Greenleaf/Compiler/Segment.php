@@ -186,7 +186,7 @@ class Segment implements Dumpable
                 );
             }
 
-            $output[] = Coercion::toString($parameters[$name]);
+            $output[] = Coercion::asString($parameters[$name]);
         }
 
         return implode('', $output);
