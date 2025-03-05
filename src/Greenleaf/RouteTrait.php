@@ -27,16 +27,12 @@ trait RouteTrait
     /**
      * @var array<string,Parameter>
      */
-    protected(set) array $parameters = [];
+    final protected(set) array $parameters = [];
 
     /**
      * @var array<string>
      */
-    protected(set) array $methods = [] {
-        get {
-            return $this->methods;
-        }
-    }
+    final protected(set) array $methods = [];
 
     /**
      * Normalize pattern
