@@ -106,11 +106,7 @@ When a Router implementation finds a match, it transforms the Route pattern into
 
 ### Greenleaf URI
 
-The URI format is mostly just a subset of HTTP URLs, with <code>leaf</code> as the scheme, standard path, query and fragment components, and one notable addition: _areas_.
-
-Denoted by a ~ as the first element of the path, an area allows the app to delineate segregated areas (such as the front end and admin) with ease.
-
-The default area is "front" and is used when no area is specified.
+The URI format is mostly just a subset of HTTP URLs, with <code>leaf</code> as the scheme, standard path, query and fragment components.
 
 For example:
 
@@ -119,7 +115,7 @@ For example:
 Greenleaf::route('test/{slug}', 'test?hello');
 
 // Creates URI
-Greenleaf::uri('leaf://~front/test?hello');
+Greenleaf::uri('leaf:/test?hello');
 // $params = ['slug' => 'value-of-slug-in-request']
 
 // Resolves to:
@@ -127,10 +123,10 @@ $actionClass = MyApp\Greenleaf\Front\TestAction::class;
 
 // --------------------------
 // Or
-Greenleaf::route('admin/blog/articles', '~admin/blog/articles');
+Greenleaf::route('admin/blog/articles', 'admin/blog/articles');
 
 // Creates URI
-Greenleaf::uri('leaf://~admin/blog/articles');
+Greenleaf::uri('leaf:/admin/blog/articles');
 
 // Resolves to:
 $actionClass = MyApp\Greenleaf\Admin\Blog\ArticlesAction::class;

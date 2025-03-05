@@ -84,7 +84,7 @@ class Action implements Route
 
 
     /**
-     * @param array<string, string|Stringable|int|float|null> $params
+     * @param array<string,string|Stringable|int|float|null> $params
      */
     public function matchOut(
         string|LeafUrl $uri,
@@ -94,10 +94,7 @@ class Action implements Route
             $uri = LeafUrl::fromString($uri);
         }
 
-        if (
-            $uri->getArea() !== $this->target->getArea() ||
-            $uri->getPath() !== $this->target->getPath()
-        ) {
+        if ($uri->getPath() !== $this->target->getPath()) {
             return null;
         }
 

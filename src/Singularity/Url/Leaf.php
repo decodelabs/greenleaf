@@ -27,8 +27,6 @@ class Leaf implements
     use QueryTrait;
     use FragmentTrait;
 
-    protected(set) string $area;
-
     /**
      * Parse string
      */
@@ -49,15 +47,13 @@ class Leaf implements
 
         if (
             $host !== null &&
-            $host !== '' &&
-            !str_starts_with($host, '~')
+            $host !== ''
         ) {
             $path = $host . $path;
             $host = null;
         }
 
         return new static(
-            area: $host,
             path: $path,
             query: $parts['query'] ?? null,
             fragment: $parts['fragment'] ?? null
@@ -68,49 +64,18 @@ class Leaf implements
      * Init with parts
      */
     final public function __construct(
-        ?string $area = null,
         ?string $path = null,
         ?string $query = null,
         ?string $fragment = null
     ) {
-        $this->area = static::normalizeArea($area);
+        if (!str_starts_with((string)$path, '/')) {
+            $path = '/' . $path;
+        }
+
         $this->path = static::normalizePath($path);
         $this->query = static::normalizeQuery($query);
         $this->fragment = static::normalizeFragment($fragment);
     }
-
-    /**
-     * Replace area
-     */
-    public function withArea(
-        ?string $area
-    ): static {
-        $output = clone $this;
-        $output->area = static::normalizeArea($area);
-        return $output;
-    }
-
-    /**
-     * Get area
-     */
-    public function getArea(): string
-    {
-        return $this->area;
-    }
-
-    /**
-     * Normalize area
-     */
-    public static function normalizeArea(
-        string|null $area
-    ): string {
-        if ($area === null) {
-            $area = 'front';
-        }
-
-        return ltrim($area, '~');
-    }
-
 
 
 
@@ -119,20 +84,10 @@ class Leaf implements
      */
     public function __toString(): string
     {
-        $output = 'leaf://';
-
-        if ($this->area !== 'front') {
-            $output .= '~' . $this->area;
-        }
+        $output = 'leaf:';
 
         if ($this->path !== null) {
-            $path = $this->path;
-
-            if ($this->area === 'front') {
-                $path = ltrim($path, '/');
-            }
-
-            $output .= $path;
+            $output .= $this->path;
         }
 
         if ($this->query !== null) {
@@ -151,7 +106,7 @@ class Leaf implements
      */
     public function toClassName(): string
     {
-        $output = Dictum::id($this->area ?? 'Front');
+        $output = '';
 
         if (
             $this->path !== null &&
@@ -160,6 +115,8 @@ class Leaf implements
             $parts = explode('/', trim($this->path, '/'));
             $parts = array_map(Dictum::id(...), $parts);
             $output .= '\\' . implode('\\', $parts);
+        } else {
+            $output .= '\\Index';
         }
 
         return $output;
@@ -173,7 +130,6 @@ class Leaf implements
         yield 'definition' => $this->__toString();
 
         yield 'meta' => [
-            'area' => $this->area,
             'path' => $this->path,
             'query' => $this->query,
             'fragment' => $this->fragment

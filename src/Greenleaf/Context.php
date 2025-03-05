@@ -33,7 +33,7 @@ class Context
 {
     protected const Archetypes = [
         Generator::class => [],
-        Action::class => ['named' => true],
+        Action::class => ['named' => false],
     ];
 
     #[Plugin]
@@ -85,8 +85,7 @@ class Context
             $this->container->has(Loader::class)
         ) {
             if (!($loader = $this->container->get(Loader::class))
-                instanceof Loader
-            ) {
+                instanceof Loader) {
                 $loader = null;
             }
         }
