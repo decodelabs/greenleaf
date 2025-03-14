@@ -1,3 +1,8 @@
+## v0.6.0 (2025-03-14)
+* Integrated Harvest Transformer
+* Allow mixed response from Actions
+* Wrapped execute args in LeafRequest
+
 ## v0.5.0 (2025-03-05)
 * Removed areas
 * Removed Action class suffix

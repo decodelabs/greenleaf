@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use Closure;
-use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
+use DecodeLabs\Greenleaf\Request as LeafRequest;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -34,12 +34,7 @@ interface Action
      */
     public function getMiddleware(): ?array;
 
-    /**
-     * @param array<string, mixed> $parameters
-     */
     public function execute(
-        Request $request,
-        LeafUrl $url,
-        array $parameters
-    ): Response;
+        LeafRequest $request
+    ): mixed;
 }

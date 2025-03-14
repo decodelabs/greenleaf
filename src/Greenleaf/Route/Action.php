@@ -13,12 +13,16 @@ use DecodeLabs\Greenleaf\Action as ActionInterface;
 use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Greenleaf\Context;
+use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
+use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
+use DecodeLabs\Harvest\ResponseProxy;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Stringable;
 
 class Action implements Route
@@ -72,14 +76,35 @@ class Action implements Route
 
             $dispatcher->add(...$middleware);
 
-            $dispatcher->add(function ($request, $next) use ($action, $parameters) {
-                return $action->execute($request, $this->target, $parameters);
+            $dispatcher->add(function (
+                Request $request,
+                Handler $next
+            ) use ($action, $parameters): Response {
+                $output = $action->execute(
+                    new LeafRequest(
+                        httpRequest: $request,
+                        leafUrl: $this->target,
+                        parameters: $parameters,
+                        route: $this
+                    )
+                );
+
+                return Harvest::transform($request, $output);
             });
 
             return $dispatcher->handle($request);
         }
 
-        return $action->execute($request, $this->target, $parameters);
+        $output = $action->execute(
+            new LeafRequest(
+                httpRequest: $request,
+                leafUrl: $this->target,
+                parameters: $parameters,
+                route: $this
+            )
+        );
+
+        return Harvest::transform($request, $output);
     }
 
 
