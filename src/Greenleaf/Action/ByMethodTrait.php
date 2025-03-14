@@ -11,9 +11,11 @@ namespace DecodeLabs\Greenleaf\Action;
 
 use Closure;
 use DecodeLabs\Greenleaf\ActionTrait;
+use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
+use DecodeLabs\Harvest\ResponseProxy;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -27,11 +29,9 @@ trait ByMethodTrait
      * Handle HTTP request
      */
     public function execute(
-        Request $request,
-        LeafUrl $url,
-        array $parameters
-    ): Response {
-        if (!$method = $this->getMethod($request, $parameters)) {
+        LeafRequest $request
+    ): mixed {
+        if (!$method = $this->getMethod($request)) {
             return $this->handleUnknownMethod($request);
         }
 
@@ -40,31 +40,19 @@ trait ByMethodTrait
              * @var Closure():Response $callback
              */
             $callback = $this->{$method}(...);
-
-            /** @var Response $output */
-            $output = $this->prepareSlingshot(
-                parameters: $parameters,
-                url: $url,
-                request: $request
-            )->invoke($callback);
-
-            return $output;
+            return $this->prepareSlingshot($request)->invoke($callback);
         } catch (Throwable $e) {
             return $this->handleException($e, $request);
         }
     }
 
-    /**
-     * @param array<string,mixed> $parameters
-     */
     protected function getMethod(
-        Request $request,
-        array $parameters
+        LeafRequest $request
     ): ?string {
-        $method = $request->getMethod();
+        $method = $request->httpRequest->getMethod();
         $method = strtolower($method);
 
-        $keys = array_keys($parameters);
+        $keys = array_keys($request->parameters);
 
         while (!empty($keys)) {
             $function = $method . 'By' . implode('', array_map('ucfirst', $keys));
@@ -88,8 +76,8 @@ trait ByMethodTrait
      * Handle HTTP OPTIONS request
      */
     public function options(
-        Request $request
-    ): Response {
+        LeafRequest $request
+    ): mixed {
         return $this->handleUnknownMethod($request);
     }
 
@@ -97,18 +85,14 @@ trait ByMethodTrait
      * Handle unknown HTTP method
      */
     protected function handleUnknownMethod(
-        Request $request
-    ): Response {
-        $method = $request->getMethod();
+        LeafRequest $request
+    ): mixed {
+        $method = $request->httpRequest->getMethod();
         $methods = [];
-        $route = $request->getAttribute('route');
         $functions = get_class_methods($this);
 
         foreach (HarvestRequest::Methods as $testMethod) {
-            if (
-                $route instanceof Route &&
-                !$route->acceptsMethod($testMethod)
-            ) {
+            if (!$request->route->acceptsMethod($testMethod)) {
                 continue;
             }
 

@@ -12,6 +12,7 @@ namespace DecodeLabs\Greenleaf;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Proxy as GlitchProxy;
 use DecodeLabs\Greenleaf\Attribute\Middleware;
+use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
 use DecodeLabs\Pandora\Container as PandoraContainer;
@@ -77,40 +78,37 @@ trait ActionTrait
 
     /**
      * Prepare slingshot
-     *
-     * @param array<string,mixed> $parameters
      */
     protected function prepareSlingshot(
-        array $parameters,
-        LeafUrl $url,
-        Request $request
+        LeafRequest $request
     ): Slingshot {
         $output = new Slingshot(
             container: $this->context->container
         );
 
         /** @var array<string,mixed> */
-        $attributes = $request->getAttributes();
+        $attributes = $request->httpRequest->getAttributes();
         /** @var array<string,mixed> */
-        $queryParams = $request->getQueryParams();
+        $queryParams = $request->httpRequest->getQueryParams();
         /** @var array<string,mixed> */
-        $urlQuery = $url->parseQuery()->toArray();
+        $urlQuery = $request->leafUrl->parseQuery()->toArray();
 
         $output->addParameters($attributes);
         $output->addParameters($queryParams);
         $output->addParameters($urlQuery);
-        $output->addParameters($parameters);
+        $output->addParameters($request->parameters);
 
         // @phpstan-ignore-next-line
         $output->addTypes([
-            LeafUrl::class => $url,
-            Request::class => $request,
+            LeafRequest::class => $request,
+            LeafUrl::class => $request->leafUrl,
+            Request::class => $request->httpRequest,
             Container::class => $this->context->container
         ]);
 
-        if ($request instanceof HarvestRequest) {
+        if ($request->httpRequest instanceof HarvestRequest) {
             $output->addType(
-                $request,
+                $request->httpRequest,
                 HarvestRequest::class
             );
         }
@@ -130,10 +128,10 @@ trait ActionTrait
      */
     protected function handleException(
         Throwable $e,
-        Request $request
+        LeafRequest $request
     ): Response {
         if (
-            $request->getHeaderLine('Accept') === 'application/json' ||
+            $request->httpRequest->getHeaderLine('Accept') === 'application/json' ||
             $this->getDefaultContentType() === 'application/json'
         ) {
             GlitchProxy::logException($e);
