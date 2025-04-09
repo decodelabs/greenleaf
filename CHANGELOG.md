@@ -1,3 +1,6 @@
+## v0.6.1 (2025-04-09)
+* Upgraded Slingshot dependency
+
 ## v0.6.0 (2025-03-14)
 * Integrated Harvest Transformer
 * Allow mixed response from Actions
