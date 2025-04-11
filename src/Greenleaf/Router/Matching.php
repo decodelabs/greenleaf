@@ -43,14 +43,14 @@ class Matching implements Router
     /**
      * Find route for leaf URI
      *
-     * @param array<string, string|Stringable|int|float|null> $params
+     * @param array<string, string|Stringable|int|float|null> $parameters
      */
     public function matchOut(
         string|LeafUrl $uri,
-        ?array $params = null
+        ?array $parameters = null
     ): ?Hit {
         foreach ($this->scanRoutes($this->generator) as $route) {
-            if ($hit = $route->matchOut($uri, $params)) {
+            if ($hit = $route->matchOut($uri, $parameters)) {
                 return $hit;
             }
         }

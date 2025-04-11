@@ -9,20 +9,21 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Route;
 
-use DecodeLabs\Greenleaf\Action as ActionInterface;
+use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Greenleaf\Context;
+use DecodeLabs\Greenleaf\PageAction;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
-use DecodeLabs\Harvest;
+use DecodeLabs\Monarch;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
 
-class Action implements Route
+class Page implements Route
 {
     use RouteTrait;
 
@@ -65,7 +66,30 @@ class Action implements Route
         Request $request,
         array $parameters
     ): Response {
-        $class = $context->archetype->resolve(ActionInterface::class, (string)$this->target);
+        if(!Monarch::$paths->hasAlias('@pages')) {
+            Monarch::$paths->alias('@pages', '@run/src/@components/pages');
+        }
+
+        $type = $this->target->parsePath()?->getExtension();
+
+        if(!$type) {
+            $type = $context->getDefaultPageType();
+
+            $this->target = $this->target->withPath(function($path) use($type) {
+                return $path?->withExtension($type) ?? '.' . $type;
+            });
+        }
+
+        if(!$class = $context->archetype->tryResolve(
+            interface: PageAction::class,
+            names: ucfirst($type)
+        )) {
+            throw Exceptional::NotFound(
+                message: 'No page handler for type "' . $type . '"',
+                http: 404
+            );
+        }
+
         $action = new $class($context);
 
         $leafRequest = new LeafRequest(
@@ -77,7 +101,7 @@ class Action implements Route
 
         return $this->dispatchAction(
             request: $leafRequest,
-            action: $action
+            action: $action,
         );
     }
 

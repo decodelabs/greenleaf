@@ -17,6 +17,7 @@ use DecodeLabs\Greenleaf;
 use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Context\Loader;
 use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
+use DecodeLabs\Greenleaf\Route\Page as PageRoute;
 use DecodeLabs\Greenleaf\Route\Redirect as RedirectRoute;
 use DecodeLabs\Harvest\Middleware\Greenleaf as GreenleafMiddleware;
 use DecodeLabs\Pandora\Container as PandoraContainer;
@@ -44,10 +45,8 @@ class Context
 
     public ?Container $container = null;
 
+    protected string $defaultPageType = 'html';
 
-    /**
-     * Init with namespace map
-     */
     public function __construct(
         ?Container $container = null,
         ?ArchetypeHandler $archetype = null
@@ -99,14 +98,22 @@ class Context
     }
 
 
-    /**
-     * Create dispatcher
-     */
     public function createDispatcher(): Dispatcher
     {
         return new GreenleafMiddleware($this);
     }
 
+
+    public function setDefaultPageType(
+        string $type
+    ): void {
+        $this->defaultPageType = $type;
+    }
+
+    public function getDefaultPageType(): string
+    {
+        return $this->defaultPageType;
+    }
 
 
     /**
@@ -164,17 +171,17 @@ class Context
     /**
      * Load route for URI
      *
-     * @param array<string, string|Stringable|int|float|null>|null $params
+     * @param array<string,string|Stringable|int|float|null>|null $parameters
      */
     public function matchOut(
         string|LeafUrl $uri,
-        ?array $params = null
+        ?array $parameters = null
     ): Hit {
         if (is_string($uri)) {
             $uri = LeafUrl::fromString($uri);
         }
 
-        if (!$hit = $this->router->matchOut($uri, $params)) {
+        if (!$hit = $this->router->matchOut($uri, $parameters)) {
             throw Exceptional::RouteNotMatched(
                 message: 'Unable to match uri to route'
             );
@@ -188,29 +195,29 @@ class Context
     /**
      * Create URL from uri
      *
-     * @param array<string, string|Stringable|int|float|null> $params
+     * @param array<string,string|Stringable|int|float|null> $parameters
      */
     public function createUrl(
         string|LeafUrl $uri,
-        ?array $params = null
+        ?array $parameters = null
     ): Url {
         if (is_string($uri)) {
             $uri = LeafUrl::fromString($uri);
         }
 
-        if (!$hit = $this->router->matchOut($uri, $params)) {
+        if (!$hit = $this->router->matchOut($uri, $parameters)) {
             throw Exceptional::RouteNotMatched(
                 message: 'Unable to match uri to route'
             );
         }
 
         $route = $hit->getRoute();
-        /** @var array<string, string|Stringable|float|int|null> */
-        $params = $hit->parameters;
+        /** @var array<string,string|Stringable|float|int|null> */
+        $parameters = $hit->parameters;
         $segments = $route->pattern->parseSegments();
 
         foreach ($segments as $i => $segment) {
-            $segments[$i] = $segment->resolve($params);
+            $segments[$i] = $segment->resolve($parameters);
         }
 
         /** @var array<string> $segments */
@@ -230,18 +237,21 @@ class Context
     /**
      * Create action route
      */
-    public function route(
+    public function action(
         string $pattern,
-        ?string $target = null,
-        ?Closure $setup = null
+        ?string $target = null
     ): ActionRoute {
-        $output = new ActionRoute($pattern, $target);
+        return new ActionRoute($pattern, $target);
+    }
 
-        if ($setup) {
-            $setup($output);
-        }
-
-        return $output;
+    /**
+     * Create page route
+     */
+    public function page(
+        string $pattern,
+        ?string $target = null
+    ): PageRoute {
+        return new PageRoute($pattern, $target);
     }
 
     /**
@@ -249,16 +259,9 @@ class Context
      */
     public function redirect(
         string $pattern,
-        string $target,
-        ?Closure $setup = null
+        string $target
     ): RedirectRoute {
-        $output = new RedirectRoute($pattern, $target);
-
-        if ($setup) {
-            $setup($output);
-        }
-
-        return $output;
+        return new RedirectRoute($pattern, $target);
     }
 }
 

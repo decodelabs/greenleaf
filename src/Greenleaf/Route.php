@@ -87,11 +87,11 @@ interface Route
     ): ?Hit;
 
     /**
-     * @param array<string, string|Stringable|int|float|null> $params
+     * @param array<string, string|Stringable|int|float|null> $parameters
      */
     public function matchOut(
         string|LeafUrl $uri,
-        ?array $params = null
+        ?array $parameters = null
     ): ?Hit;
 
 

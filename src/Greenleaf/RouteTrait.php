@@ -9,12 +9,20 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+use Closure;
 use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Compiler\Parameter;
 use DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
 use DecodeLabs\Greenleaf\Compiler\Pattern;
+use DecodeLabs\Greenleaf\Request as LeafRequest;
+use DecodeLabs\Harvest;
+use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\UriInterface as Uri;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\MiddlewareInterface as Middleware;
+use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Stringable;
 
 /**
@@ -172,11 +180,11 @@ trait RouteTrait
                 unset($parts[$i]);
             }
 
-            if (null === ($params = $segment->match($part))) {
+            if (null === ($segmentParameters = $segment->match($part))) {
                 return null;
             }
 
-            $parameters = array_merge($parameters, $params);
+            $parameters = array_merge($parameters, $segmentParameters);
         }
 
         if (!empty($parts)) {
@@ -200,13 +208,109 @@ trait RouteTrait
     }
 
     /**
-     * @param array<string,string|Stringable|int|float|null> $params
+     * @param array<string,string|Stringable|int|float|null> $parameters
      */
     public function matchOut(
         string|LeafUrl $uri,
-        ?array $params = null
+        ?array $parameters = null
     ): ?Hit {
         // Only Uri base routes can match out
         return null;
+    }
+
+
+    /**
+     * @param array<string,string|Stringable|int|float|null> $parameters
+     */
+    protected function matchActionOut(
+        string|LeafUrl $uri,
+        ?array $parameters,
+        LeafUrl $target
+    ): ?Hit {
+        if (is_string($uri)) {
+            $uri = LeafUrl::fromString($uri);
+        }
+
+        if ($uri->getPath() !== $target->getPath()) {
+            return null;
+        }
+
+        $query = $uri->parseQuery();
+        $targetQuery = $target->parseQuery();
+
+        $queryParameters = [];
+
+        foreach ($query as $key => $node) {
+            if (
+                !is_string($key) ||
+                !$node->hasValue()
+            ) {
+                continue;
+            }
+
+            $queryParameters[$key] = $node->getValue();
+        }
+
+        foreach ($targetQuery->getKeys() as $key) {
+            if (!isset($query->{$key})) {
+                return null;
+            }
+
+            unset($queryParameters[$key]);
+            unset($query->{$key});
+        }
+
+        $parameters = array_merge(
+            $queryParameters,
+            $parameters ?? []
+        );
+
+        return new Hit($this, $parameters, $query->toDelimitedString());
+    }
+
+
+    protected function dispatchAction(
+        LeafRequest $request,
+        Action $action
+    ): Response {
+        return $this->dispatchMiddleware(
+            request: $request->httpRequest,
+            middleware: $action->getMiddleware(),
+            action: function(
+                Request $httpRequest
+            ) use($request, $action): Response {
+                $output = $action->execute($request);
+
+                return Harvest::transform($httpRequest, $output);
+            }
+        );
+    }
+
+
+    /**
+     * @param ?array<string|class-string<Middleware>|Middleware|Closure(Request,Handler):Response> $middleware
+     * @param Closure(Request):Response $action
+     */
+    protected function dispatchMiddleware(
+        Request $request,
+        ?array $middleware,
+        Closure $action
+    ): Response {
+        if (empty($middleware)) {
+            return $action($request);
+        }
+
+        $dispatcher = new MiddlewareDispatcher();
+
+        $dispatcher->add(...$middleware);
+
+        $dispatcher->add(function (
+            Request $request,
+            Handler $next
+        ) use($action): Response {
+            return $action($request);
+        });
+
+        return $dispatcher->handle($request);
     }
 }
