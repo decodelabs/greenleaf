@@ -1,3 +1,9 @@
+## v0.6.2 (2025-04-11)
+* Added Page routes
+* Added PageAction interface
+* Added HTML PageAction
+* Made Action dispatch available in ActionTrait
+
 ## v0.6.1 (2025-04-09)
 * Upgraded Slingshot dependency
 

@@ -17,6 +17,7 @@
         "decodelabs/exceptional": "^0.5.3",
         "decodelabs/glitch-support": "^0.5.1",
         "decodelabs/harvest": "^0.4.5",
+        "decodelabs/monarch": "^0.1.1",
         "decodelabs/singularity": "^0.3",
         "decodelabs/slingshot": "^0.2",
         "decodelabs/veneer": "^0.12.3",
