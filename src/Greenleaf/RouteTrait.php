@@ -10,11 +10,11 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use Closure;
-use DecodeLabs\Greenleaf\Compiler\Hit;
-use DecodeLabs\Greenleaf\Compiler\Parameter;
-use DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
-use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
+use DecodeLabs\Greenleaf\Route\Hit;
+use DecodeLabs\Greenleaf\Route\Parameter;
+use DecodeLabs\Greenleaf\Route\Parameter\Validator;
+use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
@@ -42,9 +42,6 @@ trait RouteTrait
      */
     final protected(set) array $methods = [];
 
-    /**
-     * Normalize pattern
-     */
     protected function normalizePattern(
         string|Pattern $pattern
     ): Pattern {
@@ -65,13 +62,28 @@ trait RouteTrait
         return $this;
     }
 
+    public function parseParameters(): void
+    {
+        foreach($this->pattern->parseSegments($this) as $segment) {
+            if(!$segment->isDynamic()) {
+                continue;
+            }
+
+            foreach($segment->getParameters() as $name => $parameter) {
+                if(!isset($this->parameters[$name])) {
+                    $this->addParameter($parameter);
+                }
+            }
+        }
+    }
+
     /**
      * @return $this
      */
     public function addParameter(
         Parameter $parameter
     ): static {
-        $this->parameters[$parameter->getName()] = $parameter;
+        $this->parameters[$parameter->name] = $parameter;
         return $this;
     }
 
@@ -168,7 +180,7 @@ trait RouteTrait
                     return null;
                 }
 
-                $parts[$i] = $this->parameters[$paramName]->getDefault();
+                $parts[$i] = $this->parameters[$paramName]->default;
                 continue;
             }
 
@@ -185,6 +197,18 @@ trait RouteTrait
             }
 
             $parameters = array_merge($parameters, $segmentParameters);
+        }
+
+        foreach($this->parameters as $name => $parameter) {
+            if (isset($parameters[$name])) {
+                continue;
+            }
+
+            if ($parameter->hasDefault()) {
+                $parameters[$name] = $parameter->default;
+            } else {
+                return null;
+            }
         }
 
         if (!empty($parts)) {
@@ -312,5 +336,30 @@ trait RouteTrait
         });
 
         return $dispatcher->handle($request);
+    }
+
+    /**
+     * @param array<string,mixed> $values
+     * @return array<string,mixed>
+     */
+    protected function exportData(
+        array $values = []
+    ): array {
+        $values['class'] = get_class($this);
+        $values['pattern'] = (string)$this->pattern;
+
+        if (!empty($this->methods)) {
+            $values['methods'] = $this->methods;
+        }
+
+        if (!empty($this->parameters)) {
+            $values['parameters'] = [];
+
+            foreach ($this->parameters as $name => $parameter) {
+                $values['parameters'][$name] = $parameter->jsonSerialize();
+            }
+        }
+
+        return $values;
     }
 }

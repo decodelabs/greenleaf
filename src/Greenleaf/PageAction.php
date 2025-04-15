@@ -9,7 +9,8 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
-interface PageAction extends Action
+use DecodeLabs\Greenleaf\Generator\Orderable;
+
+interface PageAction extends Action, Generator, Orderable
 {
-    public int $priority { get; }
 }

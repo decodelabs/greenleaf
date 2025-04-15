@@ -11,10 +11,6 @@ namespace DecodeLabs\Greenleaf;
 
 interface Generator
 {
-    public function __construct(
-        Context $context
-    );
-
     /**
      * Generate routes
      *

@@ -16,7 +16,5 @@ interface Loader
 {
     public function loadGenerator(): Generator;
 
-    public function loadRouter(
-        Generator $generator
-    ): Router;
+    public function loadRouter(): Router;
 }

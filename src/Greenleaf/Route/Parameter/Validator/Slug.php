@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
+namespace DecodeLabs\Greenleaf\Route\Parameter\Validator;
 
 use DecodeLabs\Dictum;
-use DecodeLabs\Greenleaf\Compiler\Parameter\ValidatorAbstract;
+use DecodeLabs\Greenleaf\Route\Parameter\ValidatorAbstract;
 
 class Slug extends ValidatorAbstract
 {

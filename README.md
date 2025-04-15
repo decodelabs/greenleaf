@@ -9,9 +9,7 @@
 
 ### Super-fast directory based HTTP router
 
-Greenleaf provides a simple, fast and flexible way to route HTTP requests to controllers and actions based on the URL path.
-
-_Get news and updates on the [DecodeLabs blog](https://blog.decodelabs.com)._
+Greenleaf provides a fast and flexible way to route HTTP requests to your actions and pages.
 
 ---
 
@@ -25,38 +23,47 @@ composer require decodelabs/greenleaf
 
 ## Usage
 
-Greenleaf provides a PSR-15 middleware that can be used with any PSR-15 compatible framework. It will parse the request and attempt to match it against a set of configured routes.
+The main entry point to use Greenleaf is a PSR-15 middleware that can be used with any PSR-15 compatible framework, such as [Harvest](https://github.com/decodelabs/harvest). It will parse the request and attempt to match it against a set of configured routes.
 
-The heart of Greenleaf is a directory based class mapping that enables loading `Generators`, `Routes` and `Actions` from a directory tree that closer matches the structure of most web apps from a logical perspective.
+The system is comprised of a set of generators that can scan and find available routes, a collection of flexible route types and an extensible dispatcher architecture that allows for different matching strategies.
 
 ### Dispatcher
 
-Greenleaf exposes its Dispatcher via a Harvest Middleware to allow for easy integration and automated class resolution with Harvest.
-
-You can however instantiate the Dispatcher directly and treat it as a standard PSR HTTP Handler.
+While the dispatcher is usually accessed through middleware, you can if needed instantiate the Dispatcher directly and treat it as a standard PSR HTTP Handler.
 
 ```php
 use DecodeLabs\Greenleaf;
 use DecodeLabs\Harvest;
 
 $dispatcher = Greenleaf::createDispatcher();
-
 $request = Harvest::createRequestFromEnvironment();
 $response = $dispatcher->handle($request);
 ```
 
+### Namespace
+
+The router will use [Archetype](https://github.com/decodelabs/archetype) to resolve Action classes from the URL - you can use Archetype's namespace mapping functionality to mount a directory for Http related classes:
+
+```php
+use DecodeLabs\Archetype;
+use MyApp\Http;
+
+Archetype::alias('DecodeLabs\\Greenleaf\\*', Http::class);
+```
+
+If your app is based on the [Fabric](https://github.com/decodelabs/fabric) framework, this mapping is taken care of for you automatically, based on the app namespace in your config.
+
 ### Generators
 
-Generators are used to load and configure routes. They are simple classes that implement the `Generator` interface.
+Generators are used to load and configure routes. The `Generator` interface defines a simple mechanism for implementations to find and load routes.
 
-By default, Greenleaf will load a `Scanner` Generator which in turn will scan the configured directory tree for other Generators and load the Actions they provide.
+By default, Greenleaf will load a `Scanner` Generator which in turn will scan the directory tree for other Generators and load the Actions they provide.
 
-To define Routes in your directory tree, you can start with a Generic Routes Generator.
+To define Routes in your directory tree, you can start with a generic `Routes` Generator which expects routes to be defined by hand:
 
 
 ```php
-
-namespace MyApp\Greenleaf;
+namespace MyApp\Http;
 
 use DecodeLabs\Greenleaf;
 use DecodeLabs\Greenleaf\Generator;
@@ -88,17 +95,20 @@ class Routes implements Generator
 }
 ```
 
+
 ### Router
 
-When the Dispatcher runs, it loads an appropriate Router to take care of matching the Request to the configured Routes.
+When the Dispatcher runs, it loads an appropriate `Router` to take care of matching the request to the configured routes.
 
-At this early stage, Greenleaf provides a reference Matching implementation that just brute forces its way through the list of Routes until it finds a match. This implementation is not optimised for speed and will be replaced shortly with a high performance compiled router system that will be able to handle thousands of routes with ease.
+As of the current release, Greenleaf uses a generated switch based `PatternSwitch` Router that is extremely fast and efficient. There is also a `CheckEach` Router that runs a brute force loop over each route in turn - this is a very stable and predictable model, but is not recommended for production use.
 
-When a Router implementation finds a match, it transforms the Route pattern into a Greenleaf custom URI and a set of parameters that are then passed to the Action (if relevant).
+When a Router implementation finds a match, it transforms the route pattern into a custom "leaf URL" in the format `leaf:/path/to/file?query#fragment` and a set of parameters that are then passed to the target of the route.
 
-### Greenleaf URI
+This is one of Greenleaf's biggest strengths as both input and output forms resolve to URL formats that can be easily looked up and matched against, both when matching _in_ and when generating _out_.
 
-The URI format is mostly just a subset of HTTP URLs, with `leaf` as the scheme, standard path, query and fragment components.
+### Leaf URL
+
+The URL format is mostly just a subset of HTTP URLs, with `leaf` as the scheme, standard path, query and fragment components.
 
 For example:
 
@@ -111,29 +121,38 @@ Greenleaf::uri('leaf:/test?hello');
 // $parameters = ['slug' => 'value-of-slug-in-request']
 
 // Resolves to:
-$actionClass = MyApp\Greenleaf\TestAction::class;
+$actionClass = MyApp\Http\Test::class;
 
 // --------------------------
 // Or
-Greenleaf::action('admin/blog/articles', 'admin/blog/articles');
+Greenleaf::action('blog/articles', 'blog/articles');
 
 // Creates URI
-Greenleaf::uri('leaf:/admin/blog/articles');
+Greenleaf::uri('leaf:/blog/articles');
 
 // Resolves to:
-$actionClass = MyApp\Greenleaf\Blog\ArticlesAction::class;
+$actionClass = MyApp\Http\Blog\Articles::class;
 ```
 
-### Actions
+### Routes
 
-Once loaded, an Action only needs to implement an `execute(DecodeLabs\Greenleaf\Request $request)` method, however Greenleaf provides a number of traits that can be used to add additional functionality.
+There are currently three types of route available in Greenleaf:
+
+- **Action**: A route that maps to an Action class. The action must implement the `DecodeLabs\Greenleaf\Action` interface and provides the most flexibility in responding to requests
+- **Page**: A route that maps to page components, in the same vein as the likes of Next.js. `PageAction` adapters handle loading different types of page content
+- **Redirect**: A route that redirects the request to a different URL. This is useful for handling legacy URLs or for redirecting to a different domain
+
+
+#### Action
+
+Actions need to implement an `execute(DecodeLabs\Greenleaf\Request $request)` method, and return a Response. Greenleaf provides a number of traits that can be used to add additional functionality and simplify writing logic for your views.
 
 The `ByMethodTrait` for example will attempt to invoke a method on the Action based on the HTTP method of the request.
 
 Note that most traits that work in this fashion will use `Slingshot` to invoke the method with deep dependency injection support. In this example, the slug from the matched route request URL is passed as a string to the action handlers.
 
 ```php
-namespace MyApp\Greenleaf;
+namespace MyApp\Http;
 
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Response;
@@ -159,18 +178,43 @@ class Test implements Action
 }
 ```
 
-### URLs
+Actions don't necessarily need to return PSR-7 responses directly - Greenleaf uses [Harvest's](https://github.com/decodelabs/harvest) response transformation system to convert all types of content responses to full PSR-7 HTTP responses.
 
-One of the main benefits of Greenleaf is that it allows you to generate URLs for your routes in a simple and flexible way by creating leaf URIs with many of the required URL constructs already in place.
 
-The router will then be able to match these URIs to the correct route and pass the parameters to the URL generator.
+#### Page
+
+A page route is usually resolved to a content file or other type of component. Greenleaf provides a basic HTML file adapter that will load a file from the filesystem and return it as a response, however other packages provide more complex implementations, such as [Horizon](https://github.com/decodelabs/horizon) `Page` and `Fragment` component structures.
+
+When a page route is matched, the file path is resolved using [Monarch's](https://github.com/decodelabs/monarch) path alias system, from a base path of `@pages`. This alias if not defined by your app, defaults to the `@run/src/components/pages` directory.
+
+```php
+...
+
+// HTML file /src/components/pages/about.html
+yield Greenleaf::page('about', 'about.html');
+
+// Horizon Page /src/components/pages/blog.php
+yield Greenleaf::page('blog', 'blog.php');
+
+// Set default component type
+Greenleaf::setDefaultPageType('php');
+
+// Same as above
+yield Greenleaf::page('blog');
+```
+
+### HTTP URLs
+
+One of the main benefits of Greenleaf is that it allows you to generate URLs for your routes in a simple and flexible way by creating leaf URLs with many of the required URL constructs already in place.
+
+The router will then be able to match these URLs to the correct route and pass the parameters to the HTTP URL generator.
 
 ```php
 use DecodeLabs\Greenleaf;
 
 // route pattern: test/{slug}
 
-$url = Greenleaf::createUrl(
+$url = Greenleaf::url(
     'test?hello#fragment',
     ['slug' => 'my-slug']
 );

@@ -7,10 +7,11 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Compiler\Parameter;
+namespace DecodeLabs\Greenleaf\Route\Parameter;
 
 use DecodeLabs\Archetype;
 use DecodeLabs\Coercion;
+use ReflectionClass;
 
 abstract class ValidatorAbstract implements Validator
 {
@@ -91,5 +92,15 @@ abstract class ValidatorAbstract implements Validator
     public function isMultiSegment(): bool
     {
         return false;
+    }
+
+    /**
+     * @return array{as:string}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'as' => new ReflectionClass($this)->getShortName(),
+        ];
     }
 }

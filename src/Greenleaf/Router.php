@@ -9,17 +9,13 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
-use DecodeLabs\Greenleaf\Compiler\Hit;
+use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
 
 interface Router
 {
-    public function __construct(
-        Generator $generator
-    );
-
     /**
      * Find route for request
      */

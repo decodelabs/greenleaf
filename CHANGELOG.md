@@ -1,3 +1,14 @@
+## v0.7.0 (2025-04-15)
+* Built PatternSwitch Router
+* Added Collector Generator with caching
+* Added Caching interfaces for Router and Generator
+* Moved Compiler ns to Route
+* Renamed createUrl() to url()
+* Added named properties to url()
+* Renamed Matching Router to CheckEach
+* Load Routers and Generators with Slingshot
+* Load Generators on demand
+
 ## v0.6.2 (2025-04-11)
 * Added Page routes
 * Added PageAction interface

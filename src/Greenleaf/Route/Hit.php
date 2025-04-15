@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Compiler;
+namespace DecodeLabs\Greenleaf\Route;
 
 use DecodeLabs\Greenleaf\Route;
 

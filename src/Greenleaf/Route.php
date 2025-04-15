@@ -9,17 +9,18 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
-use DecodeLabs\Greenleaf\Compiler\Hit;
-use DecodeLabs\Greenleaf\Compiler\Parameter;
-use DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
-use DecodeLabs\Greenleaf\Compiler\Pattern;
+use DecodeLabs\Greenleaf\Route\Hit;
+use DecodeLabs\Greenleaf\Route\Parameter;
+use DecodeLabs\Greenleaf\Route\Parameter\Validator;
+use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
+use JsonSerializable;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UriInterface as Uri;
 use Stringable;
 
-interface Route
+interface Route extends JsonSerializable
 {
     public Pattern $pattern { get; }
 
@@ -34,6 +35,13 @@ interface Route
     public array $methods { get; }
 
     /**
+     * @param array<string,mixed> $data
+     */
+    public static function fromArray(
+        array $data
+    ): static;
+
+    /**
      * @param string|array<string, mixed>|Validator|null $validate
      * @return $this
      */
@@ -42,6 +50,8 @@ interface Route
         string|array|Validator|null $validate = null,
         ?string $default = null
     ): static;
+
+    public function parseParameters(): void;
 
     /**
      * @return $this
