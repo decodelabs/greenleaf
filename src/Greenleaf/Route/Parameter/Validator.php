@@ -7,9 +7,11 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Compiler\Parameter;
+namespace DecodeLabs\Greenleaf\Route\Parameter;
 
-interface Validator
+use JsonSerializable;
+
+interface Validator extends JsonSerializable
 {
     /**
      * Create validator from input
@@ -30,7 +32,7 @@ interface Validator
     /**
      * Create from array
      *
-     * @param array<string, mixed> $input
+     * @param array<string,mixed> $input
      */
     public static function fromArray(
         array $input

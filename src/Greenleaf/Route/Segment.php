@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Compiler;
+namespace DecodeLabs\Greenleaf\Route;
 
 use DecodeLabs\Coercion;
 use DecodeLabs\Exceptional;
@@ -15,7 +15,9 @@ use DecodeLabs\Glitch\Dumpable;
 use DecodeLabs\Greenleaf\Route;
 use Stringable;
 
-class Segment implements Dumpable
+class Segment implements
+    Stringable,
+    Dumpable
 {
     protected readonly int $index;
 
@@ -68,6 +70,15 @@ class Segment implements Dumpable
     }
 
 
+    public function isDynamic(): bool
+    {
+        return !(
+            count($this->tokens) === 1 &&
+            is_string($this->tokens[0])
+        );
+    }
+
+
     /**
      * Get parameter names
      *
@@ -83,7 +94,7 @@ class Segment implements Dumpable
                     continue;
                 }
 
-                $this->parameterNames[] = $token->getName();
+                $this->parameterNames[] = $token->name;
             }
 
             $this->parameterNames = array_unique($this->parameterNames);
@@ -100,6 +111,22 @@ class Segment implements Dumpable
         return
             count($this->tokens) === 1 &&
             $this->tokens[0] instanceof Parameter;
+    }
+
+    /**
+     * @return array<string,Parameter>
+     */
+    public function getParameters(): array
+    {
+        $params = [];
+
+        foreach ($this->tokens as $token) {
+            if ($token instanceof Parameter) {
+                $params[$token->name] = $token;
+            }
+        }
+
+        return $params;
     }
 
     /**
@@ -178,7 +205,7 @@ class Segment implements Dumpable
                 continue;
             }
 
-            $name = $token->getName();
+            $name = $token->name;
 
             if (!isset($parameters[$name])) {
                 throw Exceptional::UnexpectedValue(
@@ -187,6 +214,29 @@ class Segment implements Dumpable
             }
 
             $output[] = Coercion::asString($parameters[$name]);
+        }
+
+        return implode('', $output);
+    }
+
+    public function __toString(): string
+    {
+        $output = [];
+
+        foreach ($this->tokens as $token) {
+            if (is_string($token)) {
+                $output[] = $token;
+                continue;
+            }
+
+            $str = '{' . $token->name ;
+
+            if($token->isMultiSegment()) {
+                $str .= '...';
+            }
+
+            $str .= '}';
+            $output[] = $str;
         }
 
         return implode('', $output);

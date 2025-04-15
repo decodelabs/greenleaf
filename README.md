@@ -100,9 +100,9 @@ class Routes implements Generator
 
 When the Dispatcher runs, it loads an appropriate `Router` to take care of matching the request to the configured routes.
 
-_At this moment in time, Greenleaf contains a reference Matching implementation that just brute forces its way through the list of routes until it finds a match. This implementation is not optimised for speed and will be replaced with a high performance compiled router system that will be able to handle thousands of routes with ease._
+As of the current release, Greenleaf uses a generated switch based `PatternSwitch` Router that is extremely fast and efficient. There is also a `CheckEach` Router that runs a brute force loop over each route in turn - this is a very stable and predictable model, but is not recommended for production use.
 
-When a Router implementation finds a match, it transforms the route pattern into a custom "leaf URL" in the format `leaf:/path/to/file` and a set of parameters that are then passed to the target of the route.
+When a Router implementation finds a match, it transforms the route pattern into a custom "leaf URL" in the format `leaf:/path/to/file?query#fragment` and a set of parameters that are then passed to the target of the route.
 
 This is one of Greenleaf's biggest strengths as both input and output forms resolve to URL formats that can be easily looked up and matched against, both when matching _in_ and when generating _out_.
 
@@ -214,7 +214,7 @@ use DecodeLabs\Greenleaf;
 
 // route pattern: test/{slug}
 
-$url = Greenleaf::createUrl(
+$url = Greenleaf::url(
     'test?hello#fragment',
     ['slug' => 'my-slug']
 );

@@ -7,16 +7,19 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Compiler;
+namespace DecodeLabs\Greenleaf\Route;
 
-use DecodeLabs\Greenleaf\Compiler\Parameter\Validator;
-use DecodeLabs\Greenleaf\Compiler\Parameter\ValidatorAbstract;
+use Attribute;
+use DecodeLabs\Greenleaf\Route\Parameter\Validator;
+use DecodeLabs\Greenleaf\Route\Parameter\ValidatorAbstract;
+use JsonSerializable;
 
-class Parameter
+#[Attribute]
+class Parameter implements JsonSerializable
 {
-    protected readonly string $name;
-    protected ?Validator $validator;
-    protected ?string $default = null;
+    protected(set) readonly string $name;
+    public ?Validator $validator;
+    public ?string $default = null;
 
     /**
      * Init with properties
@@ -33,55 +36,6 @@ class Parameter
         $this->default = $default;
     }
 
-
-    /**
-     * Get name
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-
-    /**
-     * Set validator
-     *
-     * @return $this
-     */
-    public function setValidator(
-        ?Validator $validator
-    ): static {
-        $this->validator = $validator;
-        return $this;
-    }
-
-    /**
-     * Get validator
-     */
-    public function getValidator(): ?Validator
-    {
-        return $this->validator;
-    }
-
-    /**
-     * Set default
-     *
-     * @return $this
-     */
-    public function setDefault(
-        ?string $default
-    ): static {
-        $this->default = $default;
-        return $this;
-    }
-
-    /**
-     * Get default
-     */
-    public function getDefault(): ?string
-    {
-        return $this->default;
-    }
 
     /**
      * Has default
@@ -154,5 +108,17 @@ class Parameter
         }
 
         return $value;
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'name' => $this->name,
+            'validate' => $this->validator?->jsonSerialize(),
+            'default' => $this->default,
+        ];
     }
 }

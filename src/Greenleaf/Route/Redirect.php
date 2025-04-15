@@ -9,21 +9,23 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Route;
 
-use DecodeLabs\Greenleaf\Compiler\Pattern;
+use Attribute;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
+use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Harvest;
 use DecodeLabs\Singularity;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
 class Redirect implements Route
 {
     use RouteTrait;
 
-    protected string $target;
-    protected bool $permanent = false;
+    public string $target;
+    public bool $permanent = false;
 
     /**
      * @var bool|array<string>
@@ -31,43 +33,41 @@ class Redirect implements Route
     protected bool|array $mapQuery = false;
 
     /**
-     * Init with properties
+     * @param array{
+     *     pattern:string|Pattern,
+     *     target:string,
+     *     permanent?:bool,
+     *     mapQuery?:bool|array<string>
+     * } $data
      */
-    public function __construct(
+    public static function fromArray(
+        array $data
+    ): static {
+        return new static(
+            pattern: $data['pattern'],
+            target: $data['target'],
+            permanent: $data['permanent'] ?? false,
+            mapQuery: $data['mapQuery'] ?? false
+        );
+    }
+
+    /**
+     * Init with properties
+     *
+     * @param bool|array<string> $mapQuery
+     */
+    final public function __construct(
         string|Pattern $pattern,
-        string $target
+        string $target,
+        bool $permanent = false,
+        bool|array $mapQuery = false
     ) {
         $this->pattern = $this->normalizePattern($pattern);
         $this->target = $target;
-    }
-
-    /**
-     * Get target
-     */
-    public function getTarget(): string
-    {
-        return $this->target;
-    }
-
-    /**
-     * Set permanent
-     *
-     * @return $this
-     */
-    public function setPermanent(
-        bool $permanent
-    ): static {
         $this->permanent = $permanent;
-        return $this;
+        $this->mapQuery($mapQuery);
     }
 
-    /**
-     * Get permanent
-     */
-    public function isPermanent(): bool
-    {
-        return $this->permanent;
-    }
 
     /**
      * Set map query
@@ -133,5 +133,16 @@ class Redirect implements Route
             $url,
             $this->permanent ? 301 : 302
         );
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->exportData([
+            'target' => $this->target,
+            'permanent' => $this->permanent,
+        ]);
     }
 }

@@ -11,8 +11,10 @@ namespace DecodeLabs\Greenleaf\PageAction;
 
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf\PageAction;
+use DecodeLabs\Greenleaf\PageActionTrait;
 use DecodeLabs\Greenleaf\Action\ByMethodTrait;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
+use DecodeLabs\Greenleaf\Route\Page as PageRoute;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Response;
 use DecodeLabs\Monarch;
@@ -21,6 +23,7 @@ use Exception;
 class Html implements PageAction
 {
     use ByMethodTrait;
+    use PageActionTrait;
 
     public int $priority = 1;
 
@@ -40,5 +43,18 @@ class Html implements PageAction
         return Harvest::stream($resolvedPath, headers: [
             'Content-Type' => 'text/html; charset=utf-8'
         ]);
+    }
+
+    /**
+     * Generator routes
+     */
+    public function generateRoutes(): iterable
+    {
+        foreach($this->scanPageFiles('html') as $name => $file) {
+            yield new PageRoute(
+                pattern: $this->nameToPattern($name),
+                target: $name.'.html'
+            );
+        }
     }
 }

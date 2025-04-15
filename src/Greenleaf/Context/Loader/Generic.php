@@ -12,9 +12,10 @@ namespace DecodeLabs\Greenleaf\Context\Loader;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Context\Loader;
 use DecodeLabs\Greenleaf\Generator;
-use DecodeLabs\Greenleaf\Generator\Scanner;
+use DecodeLabs\Greenleaf\Generator\Collector;
 use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Pandora\Container as PandoraContainer;
+use DecodeLabs\Slingshot;
 
 class Generic implements Loader
 {
@@ -34,22 +35,19 @@ class Generic implements Loader
      */
     public function loadGenerator(): Generator
     {
-        return new Scanner($this->context);
+        return $this->context->newSlingshot()
+            ->newInstance(Collector::class);
     }
 
     /**
      * Load router instance
      */
-    public function loadRouter(
-        Generator $generator
-    ): Router {
+    public function loadRouter(): Router {
         $router = null;
 
         // Load router
         if ($this->context->container instanceof PandoraContainer) {
-            $router = $this->context->container->tryGetWith(Router::class, [
-                'generator' => $generator
-            ]);
+            $router = $this->context->container->tryGetWith(Router::class);
         } elseif (
             $this->context->container &&
             $this->context->container->has(Router::class)
@@ -62,8 +60,10 @@ class Generic implements Loader
         }
 
         if (!$router) {
-            $class = $this->context->archetype->resolve(Router::class, [null, 'Matching']);
-            $router = new $class($generator);
+            $class = $this->context->archetype->resolve(Router::class, [null, 'PatternSwitch', 'CheckEach']);
+
+            $router = $this->context->newSlingshot()
+                ->newInstance($class);
         }
 
         return $router;

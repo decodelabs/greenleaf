@@ -9,32 +9,57 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Route;
 
+use Attribute;
 use DecodeLabs\Exceptional;
-use DecodeLabs\Greenleaf\Compiler\Hit;
-use DecodeLabs\Greenleaf\Compiler\Pattern;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\PageAction;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
-use DecodeLabs\Monarch;
+use DecodeLabs\Greenleaf\Route\Hit;
+use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
 
-class Page implements Route
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
+class Page implements Route, Bidirectional
 {
     use RouteTrait;
 
-    protected LeafUrl $target;
+    public LeafUrl $target;
+
+    /**
+     * @param array{
+     *     pattern: string|Pattern,
+     *     target?: string|LeafUrl|null,
+     *     methods?: string|array<string>,
+     *     parameters?: array<string,Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}>
+     * } $data
+     */
+    public static function fromArray(
+        array $data
+    ): static {
+        return new static(
+            pattern: $data['pattern'],
+            target: $data['target'] ?? null,
+            method: $data['methods'] ?? [],
+            parameters: $data['parameters'] ?? []
+        );
+    }
 
     /**
      * Init with properties
+     *
+     * @param string|array<string> $method
+     * @param array<string,Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}> $parameters
      */
-    public function __construct(
+    final public function __construct(
         string|Pattern $pattern,
-        string|LeafUrl|null $target
+        string|LeafUrl|null $target = null,
+        string|array $method = [],
+        array $parameters = []
     ) {
         $this->pattern = $this->normalizePattern($pattern);
 
@@ -47,14 +72,19 @@ class Page implements Route
         }
 
         $this->target = $target;
-    }
+        $this->forMethod(...(array)$method);
 
-    /**
-     * Get target
-     */
-    public function getTarget(): LeafUrl
-    {
-        return $this->target;
+        foreach($parameters as $name => $parameter) {
+            if(is_array($parameter)) {
+                $parameter = new Parameter(
+                    name: $parameter['name'],
+                    validate: $parameter['validate'] ?? null,
+                    default: $parameter['default'] ?? null
+                );
+            }
+
+            $this->addParameter($parameter);
+        }
     }
 
 
@@ -66,10 +96,6 @@ class Page implements Route
         Request $request,
         array $parameters
     ): Response {
-        if(!Monarch::$paths->hasAlias('@pages')) {
-            Monarch::$paths->alias('@pages', '@run/src/@components/pages');
-        }
-
         $type = $this->target->parsePath()?->getExtension();
 
         if(!$type) {
@@ -118,5 +144,16 @@ class Page implements Route
             parameters: $parameters,
             target: $this->target
         );
+    }
+
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->exportData([
+            'target' => (string)$this->target
+        ]);
     }
 }

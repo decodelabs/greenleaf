@@ -14,21 +14,25 @@ use DecodeLabs\Archetype\Handler as ArchetypeHandler;
 use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf;
-use DecodeLabs\Greenleaf\Compiler\Hit;
 use DecodeLabs\Greenleaf\Context\Loader;
 use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
+use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Route\Page as PageRoute;
 use DecodeLabs\Greenleaf\Route\Redirect as RedirectRoute;
+use DecodeLabs\Greenleaf\Router\Caching as CachingRouter;
 use DecodeLabs\Harvest\Middleware\Greenleaf as GreenleafMiddleware;
+use DecodeLabs\Monarch;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use DecodeLabs\Singularity\Url;
 use DecodeLabs\Singularity\Url\Http as HttpUrl;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
+use DecodeLabs\Slingshot;
 use DecodeLabs\Veneer;
 use DecodeLabs\Veneer\Plugin;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Stringable;
+use Throwable;
 
 class Context
 {
@@ -39,6 +43,9 @@ class Context
 
     #[Plugin]
     public ArchetypeHandler $archetype;
+
+    #[Plugin]
+    public Loader $loader;
 
     #[Plugin]
     public Router $router;
@@ -63,9 +70,12 @@ class Context
             );
         }
 
-        $loader = $this->initLoader();
-        $generator = $loader->loadGenerator();
-        $this->router = $loader->loadRouter($generator);
+        $this->loader = $this->initLoader();
+        $this->router = $this->loader->loadRouter();
+
+        if(!Monarch::$paths->hasAlias('@pages')) {
+            Monarch::$paths->alias('@pages', '@run/src/@components/pages');
+        }
     }
 
     protected function initLoader(): Loader
@@ -103,6 +113,18 @@ class Context
         return new GreenleafMiddleware($this);
     }
 
+    public function newSlingshot(): Slingshot
+    {
+        $slingshot = new Slingshot($this->container);
+        $slingshot->addType($this);
+
+        if(isset($this->router)) {
+            $slingshot->addType($this->router);
+        }
+
+        return $slingshot;
+    }
+
 
     public function setDefaultPageType(
         string $type
@@ -123,21 +145,42 @@ class Context
         Request $request,
         bool $checkDir = false
     ): Hit {
-        // Route request
-        if (!$hit = $this->router->matchIn($request)) {
-            if (
-                $checkDir &&
-                $hit = $this->testDirMatch($request)
-            ) {
-                return $hit;
+        $clear = false;
+
+        while(true) {
+            try {
+                if ($hit = $this->router->matchIn($request)) {
+                    return $hit;
+                }
+
+                if (
+                    $checkDir &&
+                    $hit = $this->testDirMatch($request)
+                ) {
+                    return $hit;
+                }
+            } catch (Throwable $e) {
+                if($clear) {
+                    throw $e;
+                }
             }
 
-            throw Exceptional::RouteNotFound(
-                message: 'Route not found: ' . $request->getUri()->getPath()
-            );
+            if(
+                !$clear &&
+                Monarch::isDevelopment() &&
+                $this->router instanceof CachingRouter
+            ) {
+                $clear = true;
+                $this->router->clearCache();
+                continue;
+            }
+
+            break;
         }
 
-        return $hit;
+        throw Exceptional::RouteNotFound(
+            message: 'Route not found: ' . $request->getUri()->getPath()
+        );
     }
 
     /**
@@ -195,16 +238,17 @@ class Context
     /**
      * Create URL from uri
      *
-     * @param array<string,string|Stringable|int|float|null> $parameters
+     * @param string|Stringable|int|float|null ...$parameters
      */
-    public function createUrl(
+    public function url(
         string|LeafUrl $uri,
-        ?array $parameters = null
+        string|Stringable|int|float|null ...$parameters
     ): Url {
         if (is_string($uri)) {
             $uri = LeafUrl::fromString($uri);
         }
 
+        /** @var array<string,string|Stringable|int|float|null> $parameters */
         if (!$hit = $this->router->matchOut($uri, $parameters)) {
             throw Exceptional::RouteNotMatched(
                 message: 'Unable to match uri to route'
@@ -222,6 +266,10 @@ class Context
 
         /** @var array<string> $segments */
         $path = implode('/', $segments);
+
+        if(!str_starts_with($path, '/')) {
+            $path = '/' . $path;
+        }
 
         return new HttpUrl(
             scheme: null,
