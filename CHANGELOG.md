@@ -1,3 +1,7 @@
+## v0.7.1 (2025-04-15)
+* Fixed named parameter key types
+* Bumped dev version
+
 ## v0.7.0 (2025-04-15)
 * Built PatternSwitch Router
 * Added Collector Generator with caching

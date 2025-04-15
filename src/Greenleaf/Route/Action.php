@@ -34,7 +34,7 @@ class Action implements Route, Bidirectional
      *     pattern: string|Pattern,
      *     target?: string|LeafUrl|null,
      *     methods?: string|array<string>,
-     *     parameters?: array<string,Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}>
+     *     parameters?: array<Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}>
      * } $data
      */
     public static function fromArray(
@@ -52,7 +52,7 @@ class Action implements Route, Bidirectional
      * Init with properties
      *
      * @param string|array<string> $method
-     * @param array<string,Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}> $parameters
+     * @param array<Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}> $parameters
      */
     final public function __construct(
         string|Pattern $pattern,
