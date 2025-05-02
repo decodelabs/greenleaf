@@ -1,3 +1,6 @@
+## v0.7.2 (2025-05-02)
+* Upgraded Guidance to v0.2.0
+
 ## v0.7.1 (2025-04-15)
 * Fixed named parameter key types
 * Bumped dev version
