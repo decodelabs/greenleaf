@@ -25,7 +25,7 @@ class Uuid extends ValidatorAbstract
         ?string $value
     ): bool {
         if (class_exists(Guidance::class)) {
-            return Guidance::isValid($value);
+            return Guidance::isValidUuid($value);
         }
 
         return $value !== null;
@@ -39,7 +39,7 @@ class Uuid extends ValidatorAbstract
         }
 
         if (class_exists(Guidance::class)) {
-            return Guidance::from($value);
+            return Guidance::uuidFrom($value);
         }
 
         return $value;

@@ -118,6 +118,7 @@ class Context
         $slingshot = new Slingshot($this->container);
         $slingshot->addType($this);
 
+        // @phpstan-ignore-next-line
         if(isset($this->router)) {
             $slingshot->addType($this->router);
         }

@@ -30,9 +30,12 @@
         "psr/http-server-middleware": "^1.0.2"
     },
     "require-dev": {
-        "decodelabs/guidance": "^0.1.13",
+        "decodelabs/guidance": "^0.2",
         "decodelabs/pandora": "^0.3",
         "decodelabs/phpstan-decodelabs": "^0.7"
+    },
+    "conflict": {
+        "decodelabs/guidance": "<0.2"
     },
     "suggest": {
         "decodelabs/guidance": "Uuid route support"
