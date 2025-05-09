@@ -35,7 +35,8 @@
         "decodelabs/phpstan-decodelabs": "^0.7"
     },
     "conflict": {
-        "decodelabs/guidance": "<0.2"
+        "decodelabs/guidance": "<0.2",
+        "decodelabs/pandora": "<0.3"
     },
     "suggest": {
         "decodelabs/guidance": "Uuid route support"
