@@ -47,7 +47,8 @@ class Greenleaf implements Proxy
     public static function getDefaultPageType(): string {
         return static::$_veneerInstance->getDefaultPageType();
     }
-    public static function matchIn(Ref2 $request, bool $checkDir = false): Ref3 {
+    public static function clearDevCache(): void {}
+    public static function matchIn(Ref2 $request, bool $checkDir = false): ?Ref3 {
         return static::$_veneerInstance->matchIn(...func_get_args());
     }
     public static function matchOut(Ref4|string $uri, ?array $parameters = NULL): Ref3 {
