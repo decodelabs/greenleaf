@@ -139,49 +139,35 @@ class Context
     }
 
 
-    /**
-     * Load route for Request
-     */
+
+    public function clearDevCache(): void
+    {
+        if(!Monarch::isDevelopment()) {
+            return;
+        }
+
+        if ($this->router instanceof CachingRouter) {
+            $this->router->clearCache();
+        }
+    }
+
+
     public function matchIn(
         PsrRequest $request,
         bool $checkDir = false
-    ): Hit {
-        $clear = false;
-
-        while(true) {
-            try {
-                if ($hit = $this->router->matchIn($request)) {
-                    return $hit;
-                }
-
-                if (
-                    $checkDir &&
-                    $hit = $this->testDirMatch($request)
-                ) {
-                    return $hit;
-                }
-            } catch (Throwable $e) {
-                if($clear) {
-                    throw $e;
-                }
-            }
-
-            if(
-                !$clear &&
-                Monarch::isDevelopment() &&
-                $this->router instanceof CachingRouter
-            ) {
-                $clear = true;
-                $this->router->clearCache();
-                continue;
-            }
-
-            break;
+    ): ?Hit {
+        if ($hit = $this->router->matchIn($request)) {
+            return $hit;
         }
 
-        throw Exceptional::RouteNotFound(
-            message: 'Route not found: ' . $request->getUri()->getPath()
-        );
+        if (
+            $checkDir &&
+            $hit = $this->testDirMatch($request)
+        ) {
+            return $hit;
+        }
+
+        return null;
     }
 
     /**

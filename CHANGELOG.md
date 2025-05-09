@@ -1,3 +1,7 @@
+## v0.8.1 (2025-05-09)
+* Moved dev cache refresh to Middleware
+* Improved not found and exception handling
+
 ## v0.8.0 (2025-05-09)
 * Upgraded Harvest to v0.5.0
 * Moved Middleware Attribute to root
