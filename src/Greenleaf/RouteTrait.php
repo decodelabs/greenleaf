@@ -17,12 +17,13 @@ use DecodeLabs\Greenleaf\Route\Parameter\Validator;
 use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
+use DecodeLabs\Harvest\Profile as MiddlewareProfile;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\UriInterface as Uri;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Server\MiddlewareInterface as Middleware;
-use Psr\Http\Server\RequestHandlerInterface as Handler;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
+use Psr\Http\Server\MiddlewareInterface as PsrMiddleware;
+use Psr\Http\Server\RequestHandlerInterface as PsrHandler;
 use Stringable;
 
 /**
@@ -296,15 +297,14 @@ trait RouteTrait
     protected function dispatchAction(
         LeafRequest $request,
         Action $action
-    ): Response {
+    ): PsrResponse {
         return $this->dispatchMiddleware(
-            request: $request->httpRequest,
-            middleware: $action->getMiddleware(),
+            request: $request,
+            middleware: $action->getMiddleware($request),
             action: function(
-                Request $httpRequest
-            ) use($request, $action): Response {
+                PsrRequest $httpRequest
+            ) use($request, $action): PsrResponse {
                 $output = $action->execute($request);
-
                 return Harvest::transform($httpRequest, $output);
             }
         );
@@ -312,30 +312,32 @@ trait RouteTrait
 
 
     /**
-     * @param ?array<string|class-string<Middleware>|Middleware|Closure(Request,Handler):Response> $middleware
-     * @param Closure(Request):Response $action
+     * @param Closure(PsrRequest):PsrResponse $action
      */
     protected function dispatchMiddleware(
-        Request $request,
-        ?array $middleware,
+        LeafRequest $request,
+        ?MiddlewareProfile $middleware,
         Closure $action
-    ): Response {
-        if (empty($middleware)) {
-            return $action($request);
+    ): PsrResponse {
+        if (
+            !$middleware ||
+            $middleware->isEmpty()
+        ) {
+            return $action($request->httpRequest);
         }
 
-        $dispatcher = new MiddlewareDispatcher();
+        $profile = clone $middleware;
 
-        $dispatcher->add(...$middleware);
-
-        $dispatcher->add(function (
-            Request $request,
-            Handler $next
-        ) use($action): Response {
-            return $action($request);
+        $profile->add(function (
+            PsrRequest $psrRequest,
+            PsrHandler $next
+        ) use($action, $request): PsrResponse {
+            $request->replaceHttpRequest($psrRequest);
+            return $action($psrRequest);
         });
 
-        return $dispatcher->handle($request);
+        $dispatcher = new MiddlewareDispatcher($profile);
+        return $dispatcher->handle($request->httpRequest);
     }
 
     /**

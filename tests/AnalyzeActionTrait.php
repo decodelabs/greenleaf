@@ -13,7 +13,7 @@ use DecodeLabs\Greenleaf\Action;
 use DecodeLabs\Greenleaf\ActionTrait;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Harvest\Response\Json as JsonResponse;
-use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
 
 
 class AnalyzeActionTrait implements Action
@@ -22,7 +22,7 @@ class AnalyzeActionTrait implements Action
 
     public function execute(
         LeafRequest $request
-    ): Response {
+    ): PsrResponse {
         return new JsonResponse(['foo' => 'bar']);
     }
 }

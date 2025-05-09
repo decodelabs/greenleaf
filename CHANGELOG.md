@@ -1,3 +1,9 @@
+## v0.8.0 (2025-05-09)
+* Upgraded Harvest to v0.5.0
+* Moved Middleware Attribute to root
+* Implemented PageAction Middleware
+* Removed Middleware const list
+
 ## v0.7.2 (2025-05-02)
 * Upgraded Guidance to v0.2.0
 

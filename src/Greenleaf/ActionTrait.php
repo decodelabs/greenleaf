@@ -11,16 +11,19 @@ namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Exceptional;
 use DecodeLabs\Glitch\Proxy as GlitchProxy;
-use DecodeLabs\Greenleaf\Attribute\Middleware;
+use DecodeLabs\Greenleaf\Middleware;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Harvest;
+use DecodeLabs\Harvest\Profile as MiddlewareProfile;
 use DecodeLabs\Harvest\Request as HarvestRequest;
+use DecodeLabs\Harvest\Stage\Deferred as DeferredStage;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Slingshot;
 use Psr\Container\ContainerInterface as Container;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
+use ReflectionAttribute;
 use ReflectionClass;
 use Throwable;
 
@@ -31,54 +34,51 @@ trait ActionTrait
 {
     protected Context $context;
 
-    /**
-     * Init with Context
-     */
     public function __construct(
         Context $context
     ) {
         $this->context = $context;
     }
 
-
-    /**
-     * Get middleware list
-     */
-    public function getMiddleware(): ?array
-    {
-        if (!empty(static::Middleware)) {
-            return static::Middleware;
-        }
-
-        $ref = new ReflectionClass($this);
-        $attributes = $ref->getAttributes(Middleware::class);
+    public function getMiddleware(
+        LeafRequest $request
+    ): ?MiddlewareProfile {
+        $attributes = $this->getMiddlewareAttributes($request);
 
         if (empty($attributes)) {
             return null;
         }
 
-        $output = [];
+        $output = new MiddlewareProfile();
 
         foreach ($attributes as $attribute) {
             $attribute = $attribute->newInstance();
             $middleware = $attribute->middleware;
 
             if (is_string($middleware)) {
-                $output[$middleware] = $attribute->parameters;
+                $output->add(new DeferredStage(
+                    $middleware,
+                    parameters: $attribute->parameters
+                ));
             } else {
-                $output[] = $middleware;
+                $output->add($middleware);
             }
         }
 
-        // @phpstan-ignore-next-line
         return $output;
     }
 
-
-
     /**
-     * Prepare slingshot
+     * @return array<ReflectionAttribute<Middleware>>
      */
+    protected function getMiddlewareAttributes(
+        LeafRequest $request
+    ): array {
+        $ref = new ReflectionClass($this);
+        return $ref->getAttributes(Middleware::class);
+    }
+
+
     protected function prepareSlingshot(
         LeafRequest $request
     ): Slingshot {
@@ -102,7 +102,7 @@ trait ActionTrait
         $output->addTypes([
             LeafRequest::class => $request,
             LeafUrl::class => $request->leafUrl,
-            Request::class => $request->httpRequest,
+            PsrRequest::class => $request->httpRequest,
             Container::class => $this->context->container
         ]);
 
@@ -123,13 +123,10 @@ trait ActionTrait
         return $output;
     }
 
-    /**
-     * Handle exception
-     */
     protected function handleException(
         Throwable $e,
         LeafRequest $request
-    ): Response {
+    ): PsrResponse {
         if (
             $request->httpRequest->getHeaderLine('Accept') === 'application/json' ||
             $this->getDefaultContentType() === 'application/json'
@@ -153,9 +150,6 @@ trait ActionTrait
         throw $e;
     }
 
-    /**
-     * Get default content type
-     */
     protected function getDefaultContentType(): string
     {
         if (

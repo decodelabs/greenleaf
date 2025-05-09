@@ -12,13 +12,9 @@ namespace DecodeLabs\Greenleaf\Action;
 use Closure;
 use DecodeLabs\Greenleaf\ActionTrait;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
-use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
-use DecodeLabs\Harvest\ResponseProxy;
-use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Throwable;
 
 trait ByMethodTrait
@@ -37,7 +33,7 @@ trait ByMethodTrait
 
         try {
             /**
-             * @var Closure():Response $callback
+             * @var Closure():PsrResponse $callback
              */
             $callback = $this->{$method}(...);
             return $this->prepareSlingshot($request)->invoke($callback);

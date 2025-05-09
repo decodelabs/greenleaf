@@ -18,7 +18,7 @@ use DecodeLabs\Greenleaf\Router\PatternSwitch\InStep;
 use DecodeLabs\Greenleaf\Router\PatternSwitch\OutMap;
 use DecodeLabs\Iota;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
 
 class PatternSwitch implements Caching, Router
@@ -32,7 +32,7 @@ class PatternSwitch implements Caching, Router
      * Find route for request
      */
     public function matchIn(
-        Request $request
+        PsrRequest $request
     ): ?Hit {
         return $this->loadSwitches()->matchIn($request);
     }
@@ -92,7 +92,7 @@ class PatternSwitch implements Caching, Router
         $uses['Hit'] = 'DecodeLabs\Greenleaf\Route\Hit';
         $uses['Router'] = 'DecodeLabs\Greenleaf\Router';
         $uses['LeafUrl'] = 'DecodeLabs\Singularity\Url\Leaf';
-        $uses['Request'] = 'Psr\Http\Message\ServerRequestInterface';
+        $uses['PsrRequest'] = 'Psr\Http\Message\ServerRequestInterface';
 
         $uses = array_unique($uses);
         asort($uses);
@@ -114,7 +114,7 @@ class PatternSwitch implements Caching, Router
         return new class implements Router
         {
             public function matchIn(
-                Request \$request
+                PsrRequest \$request
             ): ?Hit {
                 {$matchInString};
             }

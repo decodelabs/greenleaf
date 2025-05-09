@@ -22,6 +22,12 @@ class Request {
         protected(set) Route $route
     ) {}
 
+    public function replaceHttpRequest(
+        PsrRequest $httpRequest
+    ): void {
+        $this->httpRequest = $httpRequest;
+    }
+
     public function hasParameter(
         string $name
     ): bool {

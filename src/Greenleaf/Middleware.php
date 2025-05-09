@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf\Attribute;
+namespace DecodeLabs\Greenleaf;
 
 use Attribute;
 use Closure;
@@ -17,7 +17,8 @@ use Psr\Http\Server\MiddlewareInterface as PsrMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as PsrHandler;
 
 #[Attribute(
-    Attribute::TARGET_CLASS
+    Attribute::TARGET_CLASS |
+    Attribute::TARGET_FUNCTION
 )]
 class Middleware
 {

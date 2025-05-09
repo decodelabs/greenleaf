@@ -30,7 +30,7 @@ use DecodeLabs\Slingshot;
 use DecodeLabs\Veneer;
 use DecodeLabs\Veneer\Plugin;
 use Psr\Container\ContainerInterface as Container;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
 use Throwable;
 
@@ -143,7 +143,7 @@ class Context
      * Load route for Request
      */
     public function matchIn(
-        Request $request,
+        PsrRequest $request,
         bool $checkDir = false
     ): Hit {
         $clear = false;
@@ -188,7 +188,7 @@ class Context
      * Test if tailing / affects match
      */
     protected function testDirMatch(
-        Request $request
+        PsrRequest $request
     ): ?Hit {
         $url = $request->getUri();
         $path = $url->getPath();

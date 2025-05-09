@@ -19,8 +19,8 @@ use DecodeLabs\Greenleaf\RouteTrait;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
@@ -93,9 +93,9 @@ class Page implements Route, Bidirectional
      */
     public function handleIn(
         Context $context,
-        Request $request,
+        PsrRequest $request,
         array $parameters
-    ): Response {
+    ): PsrResponse {
         $type = $this->target->parsePath()?->getExtension();
 
         if(!$type) {
