@@ -16,8 +16,8 @@ use DecodeLabs\Greenleaf\RouteTrait;
 use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Harvest;
 use DecodeLabs\Singularity;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
 class Redirect implements Route
@@ -102,9 +102,9 @@ class Redirect implements Route
      */
     public function handleIn(
         Context $context,
-        Request $request,
+        PsrRequest $request,
         array $parameters
-    ): Response {
+    ): PsrResponse {
         $currentUrl = $request->getUri();
         $url = Singularity::url($this->target, $currentUrl);
 

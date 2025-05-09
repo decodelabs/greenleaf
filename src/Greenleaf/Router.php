@@ -11,7 +11,7 @@ namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
 
 interface Router
@@ -20,7 +20,7 @@ interface Router
      * Find route for request
      */
     public function matchIn(
-        Request $request
+        PsrRequest $request
     ): ?Hit;
 
 

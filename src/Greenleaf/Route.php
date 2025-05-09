@@ -15,8 +15,8 @@ use DecodeLabs\Greenleaf\Route\Parameter\Validator;
 use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use JsonSerializable;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Psr\Http\Message\UriInterface as Uri;
 use Stringable;
 
@@ -110,7 +110,7 @@ interface Route extends JsonSerializable
      */
     public function handleIn(
         Context $context,
-        Request $request,
+        PsrRequest $request,
         array $parameters
-    ): Response;
+    ): PsrResponse;
 }

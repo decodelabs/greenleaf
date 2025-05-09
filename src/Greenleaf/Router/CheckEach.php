@@ -15,7 +15,7 @@ use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Greenleaf\RouterTrait;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
 
 class CheckEach implements Router, Caching
@@ -36,7 +36,7 @@ class CheckEach implements Router, Caching
      * Find route for request
      */
     public function matchIn(
-        Request $request
+        PsrRequest $request
     ): ?Hit {
         $method = $request->getMethod();
         $uri = $request->getUri();
