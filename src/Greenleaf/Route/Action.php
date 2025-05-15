@@ -71,6 +71,11 @@ class Action implements Route, Bidirectional
         }
 
         $this->target = $target;
+
+        if(empty($method)) {
+            $method = 'GET';
+        }
+
         $this->forMethod(...(array)$method);
 
         foreach($parameters as $name => $parameter) {
