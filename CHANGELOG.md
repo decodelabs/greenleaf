@@ -1,3 +1,6 @@
+## v0.8.2 (2025-05-15)
+* Added automated Action discovery
+
 ## v0.8.1 (2025-05-09)
 * Moved dev cache refresh to Middleware
 * Improved not found and exception handling
