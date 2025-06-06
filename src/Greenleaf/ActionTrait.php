@@ -10,13 +10,13 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Exceptional;
-use DecodeLabs\Glitch\Proxy as GlitchProxy;
 use DecodeLabs\Greenleaf\Middleware;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Profile as MiddlewareProfile;
 use DecodeLabs\Harvest\Request as HarvestRequest;
 use DecodeLabs\Harvest\Stage\Deferred as DeferredStage;
+use DecodeLabs\Monarch;
 use DecodeLabs\Pandora\Container as PandoraContainer;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Slingshot;
@@ -131,7 +131,7 @@ trait ActionTrait
             $request->httpRequest->getHeaderLine('Accept') === 'application/json' ||
             $this->getDefaultContentType() === 'application/json'
         ) {
-            GlitchProxy::logException($e);
+            Monarch::logException($e);
 
             if ($e instanceof Exceptional\Exception) {
                 $code = $e->http ?? 500;

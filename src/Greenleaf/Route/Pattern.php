@@ -10,8 +10,9 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\Route;
 
 use DecodeLabs\Exceptional;
-use DecodeLabs\Glitch\Dumpable;
 use DecodeLabs\Greenleaf\Route;
+use DecodeLabs\Nuance\Dumpable;
+use DecodeLabs\Nuance\Entity\NativeObject as NuanceEntity;
 use Stringable;
 
 class Pattern implements Stringable, Dumpable
@@ -84,16 +85,11 @@ class Pattern implements Stringable, Dumpable
         return $this->pattern;
     }
 
-
-    /**
-     * Dump for glitch
-     */
-    public function glitchDump(): iterable
+    public function toNuanceEntity(): NuanceEntity
     {
-        yield 'text' => $this->pattern;
-
-        yield 'meta' => [
-            'segments' => $this->parseSegments()
-        ];
+        $entity = new NuanceEntity($this);
+        $entity->text = $this->pattern;
+        $entity->meta['segments'] = $this->parseSegments();
+        return $entity;
     }
 }

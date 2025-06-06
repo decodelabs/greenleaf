@@ -11,7 +11,8 @@ namespace DecodeLabs\Singularity\Url;
 
 use DecodeLabs\Dictum;
 use DecodeLabs\Exceptional;
-use DecodeLabs\Glitch\Dumpable;
+use DecodeLabs\Nuance\Dumpable;
+use DecodeLabs\Nuance\Entity\NativeObject as NuanceEntity;
 use DecodeLabs\Singularity\Url;
 
 class Leaf implements
@@ -122,17 +123,17 @@ class Leaf implements
         return $output;
     }
 
-    /**
-     * Dump for glitch
-     */
-    public function glitchDump(): iterable
+    public function toNuanceEntity(): NuanceEntity
     {
-        yield 'definition' => $this->__toString();
+        $entity = new NuanceEntity($this);
+        $entity->definition = $this->__toString();
 
-        yield 'meta' => [
+        $entity->meta = [
             'path' => $this->path,
             'query' => $this->query,
             'fragment' => $this->fragment
         ];
+
+        return $entity;
     }
 }

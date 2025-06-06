@@ -11,8 +11,9 @@ namespace DecodeLabs\Greenleaf\Route;
 
 use DecodeLabs\Coercion;
 use DecodeLabs\Exceptional;
-use DecodeLabs\Glitch\Dumpable;
 use DecodeLabs\Greenleaf\Route;
+use DecodeLabs\Nuance\Dumpable;
+use DecodeLabs\Nuance\Entity\NativeObject as NuanceEntity;
 use Stringable;
 
 class Segment implements
@@ -243,15 +244,11 @@ class Segment implements
     }
 
 
-    /**
-     * Dump for glitch
-     */
-    public function glitchDump(): iterable
+    public function toNuanceEntity(): NuanceEntity
     {
-        yield 'properties' => [
-            '*index' => $this->index
-        ];
-
-        yield 'values' => $this->tokens;
+        $entity = new NuanceEntity($this);
+        $entity->setProperty('index', $this->index, 'protected', readOnly: true);
+        $entity->values = $this->tokens;
+        return $entity;
     }
 }
