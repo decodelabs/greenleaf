@@ -29,7 +29,7 @@ class Pages implements Generator, Orderable
         $providers = [];
         $slingshot = $this->context->newSlingshot();
 
-        foreach($this->context->archetype->scanClasses(PageAction::class) as $class) {
+        foreach ($this->context->archetype->scanClasses(PageAction::class) as $class) {
             $providers[] = $slingshot->newInstance($class);
         }
 
@@ -37,7 +37,7 @@ class Pages implements Generator, Orderable
             return $b->priority <=> $a->priority;
         });
 
-        foreach($providers as $provider) {
+        foreach ($providers as $provider) {
             yield from $provider->generateRoutes();
         }
     }

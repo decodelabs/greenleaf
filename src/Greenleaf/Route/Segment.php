@@ -230,9 +230,9 @@ class Segment implements
                 continue;
             }
 
-            $str = '{' . $token->name ;
+            $str = '{' . $token->name;
 
-            if($token->isMultiSegment()) {
+            if ($token->isMultiSegment()) {
                 $str .= '...';
             }
 

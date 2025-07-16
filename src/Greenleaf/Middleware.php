@@ -25,12 +25,12 @@ class Middleware
     /**
      * @var string|class-string<PsrMiddleware>|PsrMiddleware|Closure(PsrRequest,PsrHandler):PsrResponse
      */
-    protected(set) string|PsrMiddleware|Closure $middleware;
+    public protected(set) string|PsrMiddleware|Closure $middleware;
 
     /**
      * @var array<string,mixed>
      */
-    protected(set) array $parameters;
+    public protected(set) array $parameters;
 
     /**
      * @param string|class-string<PsrMiddleware>|PsrMiddleware|Closure(PsrRequest, PsrHandler):PsrResponse $middleware

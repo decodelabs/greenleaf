@@ -19,18 +19,18 @@ class OutMap
     /**
      * @var array<string,OutGroup>
      */
-    protected(set) array $groups = [];
+    public protected(set) array $groups = [];
 
     public function mapRoute(
         Route $route
     ): void {
-        if(!$route instanceof Bidirectional) {
+        if (!$route instanceof Bidirectional) {
             return;
         }
 
         $path = $route->target->getPath();
 
-        if(!isset($this->groups[$path])) {
+        if (!isset($this->groups[$path])) {
             $this->groups[$path] = new OutGroup();
         }
 
@@ -42,14 +42,14 @@ class OutMap
     {
         $cases = [];
 
-        foreach($this->groups as $path => $group) {
+        foreach ($this->groups as $path => $group) {
             $groupData = [];
             $routeData = [];
 
-            foreach($group->routes as $route) {
+            foreach ($group->routes as $route) {
                 $queryKeys = $route->target->parseQuery()->getKeys();
                 $pattern = (string)$route->pattern;
-                $id = uniqid('||route-', true).'||';
+                $id = uniqid('||route-', true) . '||';
 
                 $groupData[$pattern] = [
                     'queryKeys' => $queryKeys,
@@ -63,7 +63,7 @@ class OutMap
             $groupDataString = Hatch::exportStaticArray($groupData);
 
             /** @var array<string,string|array<mixed>> $route */
-            foreach($routeData as $id => $route) {
+            foreach ($routeData as $id => $route) {
                 $class = Coercion::asString($route['class']);
                 unset($route['class']);
                 $routeString = Hatch::exportStaticArray($route);

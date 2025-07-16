@@ -15,7 +15,6 @@ use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Harvest\Response\Json as JsonResponse;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 
-
 class AnalyzeActionTrait implements Action
 {
     use ActionTrait;

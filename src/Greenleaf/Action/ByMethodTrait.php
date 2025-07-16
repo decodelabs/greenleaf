@@ -32,9 +32,7 @@ trait ByMethodTrait
         }
 
         try {
-            /**
-             * @var Closure():PsrResponse $callback
-             */
+            /** @var Closure():PsrResponse $callback */
             $callback = $this->{$method}(...);
             return $this->prepareSlingshot($request)->invoke($callback);
         } catch (Throwable $e) {

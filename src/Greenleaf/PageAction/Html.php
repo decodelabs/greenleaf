@@ -10,15 +10,14 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\PageAction;
 
 use DecodeLabs\Exceptional;
+use DecodeLabs\Greenleaf\Action\ByMethodTrait;
 use DecodeLabs\Greenleaf\PageAction;
 use DecodeLabs\Greenleaf\PageActionTrait;
-use DecodeLabs\Greenleaf\Action\ByMethodTrait;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route\Page as PageRoute;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Response;
 use DecodeLabs\Monarch;
-use Exception;
 
 class Html implements PageAction
 {
@@ -30,12 +29,12 @@ class Html implements PageAction
     public function get(
         LeafRequest $request
     ): Response {
-        $path = '@pages/'.ltrim($request->leafUrl->getPath(), '/');
+        $path = '@pages/' . ltrim($request->leafUrl->getPath(), '/');
         $resolvedPath = Monarch::$paths->resolve($path);
 
-        if(!file_exists($resolvedPath)) {
+        if (!file_exists($resolvedPath)) {
             throw Exceptional::NotFound(
-                message: 'Page not found: '.$path,
+                message: 'Page not found: ' . $path,
                 http: 404
             );
         }
@@ -50,10 +49,10 @@ class Html implements PageAction
      */
     public function generateRoutes(): iterable
     {
-        foreach($this->scanPageFiles('html') as $name => $file) {
+        foreach ($this->scanPageFiles('html') as $name => $file) {
             yield new PageRoute(
                 pattern: $this->nameToPattern($name),
-                target: $name.'.html'
+                target: $name . '.html'
             );
         }
     }

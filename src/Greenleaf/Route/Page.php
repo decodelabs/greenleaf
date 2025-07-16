@@ -16,8 +16,6 @@ use DecodeLabs\Greenleaf\PageAction;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
-use DecodeLabs\Greenleaf\Route\Hit;
-use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
@@ -74,8 +72,8 @@ class Page implements Route, Bidirectional
         $this->target = $target;
         $this->forMethod(...(array)$method);
 
-        foreach($parameters as $name => $parameter) {
-            if(is_array($parameter)) {
+        foreach ($parameters as $name => $parameter) {
+            if (is_array($parameter)) {
                 $parameter = new Parameter(
                     name: $parameter['name'],
                     validate: $parameter['validate'] ?? null,
@@ -98,15 +96,15 @@ class Page implements Route, Bidirectional
     ): PsrResponse {
         $type = $this->target->parsePath()?->getExtension();
 
-        if(!$type) {
+        if (!$type) {
             $type = $context->getDefaultPageType();
 
-            $this->target = $this->target->withPath(function($path) use($type) {
+            $this->target = $this->target->withPath(function ($path) use ($type) {
                 return $path?->withExtension($type) ?? '.' . $type;
             });
         }
 
-        if(!$class = $context->archetype->tryResolve(
+        if (!$class = $context->archetype->tryResolve(
             interface: PageAction::class,
             names: ucfirst($type)
         )) {

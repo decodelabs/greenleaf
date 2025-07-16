@@ -44,12 +44,12 @@ class Directory implements Generator, Orderable
         $slingshot = $this->context->newSlingshot();
         $generators = [];
 
-        foreach($this->context->archetype->scanClasses(Generator::class) as $path => $class) {
+        foreach ($this->context->archetype->scanClasses(Generator::class) as $path => $class) {
             $generator = $slingshot->newInstance($class);
             $priority = $generator instanceof Orderable ? $generator->priority : 0;
 
-            if($priority === 0) {
-                if($local = $namespaces->localize($class)) {
+            if ($priority === 0) {
+                if ($local = $namespaces->localize($class)) {
                     $priority = count(explode('\\', $local)) * 10;
                 } else {
                     $priority = 10;
@@ -64,7 +64,7 @@ class Directory implements Generator, Orderable
         });
 
 
-        foreach($generators as $generator) {
+        foreach ($generators as $generator) {
             yield from $generator[0]->generateRoutes();
         }
     }
@@ -76,7 +76,7 @@ class Directory implements Generator, Orderable
     {
         $namespaces = $this->context->archetype->getNamespaceMap()->map(Action::class);
 
-        foreach($this->context->archetype->scanClasses(Action::class) as $path => $class) {
+        foreach ($this->context->archetype->scanClasses(Action::class) as $path => $class) {
             $ref = new ReflectionClass($class);
             $attributes = $ref->getAttributes();
 
@@ -85,19 +85,19 @@ class Directory implements Generator, Orderable
             /** @var array<Parameter> */
             $parameters = [];
 
-            foreach($attributes as $attribute) {
-                if(is_a($attribute->name, Parameter::class, true)) {
+            foreach ($attributes as $attribute) {
+                if (is_a($attribute->name, Parameter::class, true)) {
                     $parameters[] = $attribute->newInstance();
                     continue;
                 }
 
-                if(is_a($attribute->name, Route::class, true)) {
+                if (is_a($attribute->name, Route::class, true)) {
                     $routes[] = $attribute->newInstance();
                     continue;
                 }
             }
 
-            if(empty($routes)) {
+            if (empty($routes)) {
                 $name = strtolower((string)preg_replace_callback(
                     '/([a-z])([A-Z])/',
                     function (array $matches) {
@@ -113,9 +113,9 @@ class Directory implements Generator, Orderable
             }
 
             /** @var ActionRoute $route */
-            foreach($routes as $route) {
+            foreach ($routes as $route) {
                 /** @var Parameter $parameter */
-                foreach($parameters as $parameter) {
+                foreach ($parameters as $parameter) {
                     $route->addParameter($parameter);
                 }
 

@@ -17,7 +17,7 @@ use JsonSerializable;
 #[Attribute]
 class Parameter implements JsonSerializable
 {
-    protected(set) readonly string $name;
+    public protected(set) readonly string $name;
     public ?Validator $validator;
     public ?string $default = null;
 

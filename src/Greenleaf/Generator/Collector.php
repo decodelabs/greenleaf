@@ -40,7 +40,7 @@ class Collector implements Generator, Caching, Orderable
     ): void {
         $class = $this->context->archetype->resolve(Generator::class, $name);
 
-        if(!in_array($class, $this->generatorNames)) {
+        if (!in_array($class, $this->generatorNames)) {
             return;
         }
 
@@ -51,7 +51,7 @@ class Collector implements Generator, Caching, Orderable
     {
         $routes = $this->loadRouteData();
 
-        foreach($routes as $i => $route) {
+        foreach ($routes as $i => $route) {
             /** @var class-string<Route> */
             $class = $route['class'];
             yield $class::fromArray($route);
@@ -65,7 +65,7 @@ class Collector implements Generator, Caching, Orderable
     {
         $repo = Iota::loadStatic('greenleaf');
 
-        if($repo->has('routes')) {
+        if ($repo->has('routes')) {
             $output = $repo->return('routes');
         } else {
             $output = $this->generateRouteData();
@@ -84,35 +84,35 @@ class Collector implements Generator, Caching, Orderable
         /** @var array<array<string,mixed>> */
         $routes = [];
 
-        foreach($this->scanGenerators() as $generator) {
-            foreach($this->scanGeneratorRoutes($generator) as $route) {
+        foreach ($this->scanGenerators() as $generator) {
+            foreach ($this->scanGeneratorRoutes($generator) as $route) {
                 $routes[] = $route->jsonSerialize();
             }
         }
 
         // @phpstan-ignore-next-line
-        usort($routes, function(array $a, array $b) {
+        usort($routes, function (array $a, array $b) {
             $partsA = explode('/', ltrim(Coercion::asString($a['pattern']), '/'));
             $partsB = explode('/', ltrim(Coercion::asString($b['pattern']), '/'));
             $countA = count($partsA);
             $countB = count($partsB);
 
-            if($countA !== $countB) {
+            if ($countA !== $countB) {
                 return $countB <=> $countA;
             }
 
-            foreach($partsA as $i => $partA) {
+            foreach ($partsA as $i => $partA) {
                 $partB = (string)($partsB[$i] ?? '');
 
-                if($partA === $partB) {
+                if ($partA === $partB) {
                     continue;
                 }
 
-                if(preg_match('/^\{[a-zA-Z0-9_]+\}$/', $partA)) {
+                if (preg_match('/^\{[a-zA-Z0-9_]+\}$/', $partA)) {
                     return 1;
                 }
 
-                if(preg_match('/^\{[a-zA-Z0-9_]+\}$/', $partB)) {
+                if (preg_match('/^\{[a-zA-Z0-9_]+\}$/', $partB)) {
                     return -1;
                 }
 
@@ -132,8 +132,8 @@ class Collector implements Generator, Caching, Orderable
     protected function scanGeneratorRoutes(
         Generator $generator
     ): iterable {
-        foreach($generator->generateRoutes() as $route) {
-            if($route instanceof Generator) {
+        foreach ($generator->generateRoutes() as $route) {
+            if ($route instanceof Generator) {
                 yield from $this->scanGeneratorRoutes($route);
                 continue;
             }
@@ -151,10 +151,10 @@ class Collector implements Generator, Caching, Orderable
         $classes = $generators = [];
         $slingshot = $this->context->newSlingshot();
 
-        foreach($this->generatorNames as $name) {
+        foreach ($this->generatorNames as $name) {
             $class = $this->context->archetype->resolve(Generator::class, $name);
 
-            if(in_array($class, $classes)) {
+            if (in_array($class, $classes)) {
                 continue;
             }
 

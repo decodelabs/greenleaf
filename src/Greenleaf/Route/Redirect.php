@@ -13,7 +13,6 @@ use Attribute;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
-use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Harvest;
 use DecodeLabs\Singularity;
 use Psr\Http\Message\ResponseInterface as PsrResponse;

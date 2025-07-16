@@ -19,10 +19,9 @@ use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
 use DecodeLabs\Harvest\Profile as MiddlewareProfile;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use Psr\Http\Message\UriInterface as Uri;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
-use Psr\Http\Server\MiddlewareInterface as PsrMiddleware;
+use Psr\Http\Message\UriInterface as Uri;
 use Psr\Http\Server\RequestHandlerInterface as PsrHandler;
 use Stringable;
 
@@ -31,17 +30,17 @@ use Stringable;
  */
 trait RouteTrait
 {
-    protected(set) Pattern $pattern;
+    public protected(set) Pattern $pattern;
 
     /**
      * @var array<string,Parameter>
      */
-    final protected(set) array $parameters = [];
+    final public protected(set) array $parameters = [];
 
     /**
      * @var array<string>
      */
-    final protected(set) array $methods = [];
+    final public protected(set) array $methods = [];
 
     protected function normalizePattern(
         string|Pattern $pattern
@@ -65,13 +64,13 @@ trait RouteTrait
 
     public function parseParameters(): void
     {
-        foreach($this->pattern->parseSegments($this) as $segment) {
-            if(!$segment->isDynamic()) {
+        foreach ($this->pattern->parseSegments($this) as $segment) {
+            if (!$segment->isDynamic()) {
                 continue;
             }
 
-            foreach($segment->getParameters() as $name => $parameter) {
-                if(!isset($this->parameters[$name])) {
+            foreach ($segment->getParameters() as $name => $parameter) {
+                if (!isset($this->parameters[$name])) {
                     $this->addParameter($parameter);
                 }
             }
@@ -200,7 +199,7 @@ trait RouteTrait
             $parameters = array_merge($parameters, $segmentParameters);
         }
 
-        foreach($this->parameters as $name => $parameter) {
+        foreach ($this->parameters as $name => $parameter) {
             if (isset($parameters[$name])) {
                 continue;
             }
@@ -301,9 +300,9 @@ trait RouteTrait
         return $this->dispatchMiddleware(
             request: $request,
             middleware: $action->getMiddleware($request),
-            action: function(
+            action: function (
                 PsrRequest $httpRequest
-            ) use($request, $action): PsrResponse {
+            ) use ($request, $action): PsrResponse {
                 $output = $action->execute($request);
                 return Harvest::transform($httpRequest, $output);
             }
@@ -331,7 +330,7 @@ trait RouteTrait
         $profile->add(function (
             PsrRequest $psrRequest,
             PsrHandler $next
-        ) use($action, $request): PsrResponse {
+        ) use ($action, $request): PsrResponse {
             $request->replaceHttpRequest($psrRequest);
             return $action($psrRequest);
         });

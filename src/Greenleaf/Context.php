@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
-use Closure;
 use DecodeLabs\Archetype\Handler as ArchetypeHandler;
 use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
 use DecodeLabs\Exceptional;
@@ -32,7 +31,6 @@ use DecodeLabs\Veneer\Plugin;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
-use Throwable;
 
 class Context
 {
@@ -73,7 +71,7 @@ class Context
         $this->loader = $this->initLoader();
         $this->router = $this->loader->loadRouter();
 
-        if(!Monarch::$paths->hasAlias('@pages')) {
+        if (!Monarch::$paths->hasAlias('@pages')) {
             Monarch::$paths->alias('@pages', '@run/src/@components/pages');
         }
     }
@@ -119,7 +117,7 @@ class Context
         $slingshot->addType($this);
 
         // @phpstan-ignore-next-line
-        if(isset($this->router)) {
+        if (isset($this->router)) {
             $slingshot->addType($this->router);
         }
 
@@ -142,7 +140,7 @@ class Context
 
     public function clearDevCache(): void
     {
-        if(!Monarch::isDevelopment()) {
+        if (!Monarch::isDevelopment()) {
             return;
         }
 
@@ -254,7 +252,7 @@ class Context
         /** @var array<string> $segments */
         $path = implode('/', $segments);
 
-        if(!str_starts_with($path, '/')) {
+        if (!str_starts_with($path, '/')) {
             $path = '/' . $path;
         }
 

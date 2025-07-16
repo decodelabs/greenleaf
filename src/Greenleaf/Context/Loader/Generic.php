@@ -15,7 +15,6 @@ use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Generator\Collector;
 use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Pandora\Container as PandoraContainer;
-use DecodeLabs\Slingshot;
 
 class Generic implements Loader
 {
@@ -42,7 +41,8 @@ class Generic implements Loader
     /**
      * Load router instance
      */
-    public function loadRouter(): Router {
+    public function loadRouter(): Router
+    {
         $router = null;
 
         // Load router

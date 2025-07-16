@@ -11,9 +11,9 @@ namespace DecodeLabs\Greenleaf\Router;
 
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Generator;
+use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Greenleaf\RouterTrait;
-use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;

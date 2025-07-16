@@ -28,7 +28,7 @@ trait RouterTrait
     {
         $generator = $this->context->loader->loadGenerator();
 
-        if($generator instanceof Caching) {
+        if ($generator instanceof Caching) {
             $generator->clearCache();
         }
     }

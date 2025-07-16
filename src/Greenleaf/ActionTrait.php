@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Exceptional;
-use DecodeLabs\Greenleaf\Middleware;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Profile as MiddlewareProfile;

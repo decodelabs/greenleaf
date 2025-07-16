@@ -49,13 +49,13 @@ class InStep
 
         $segmentString = (string)$segment;
 
-        if(isset($this->steps[$segmentString])) {
+        if (isset($this->steps[$segmentString])) {
             $step = $this->steps[$segmentString];
         } else {
             $this->steps[$segmentString] = $step = new self($segment);
         }
 
-        if(empty($segments)) {
+        if (empty($segments)) {
             $step->routes[(string)$route->pattern] = $route;
         } else {
             $step->mapSegments(
@@ -77,14 +77,14 @@ class InStep
         $cases = $dynamics = [];
         $singleDynamic = '';
 
-        foreach($this->steps as $key => $step) {
-            if(!$step->segment) {
+        foreach ($this->steps as $key => $step) {
+            if (!$step->segment) {
                 continue;
             }
 
             $switchString = str_replace("\n", "\n    ", $step->generateSwitches());
 
-            if($step->isDynamic()) {
+            if ($step->isDynamic()) {
                 $regex = $step->segment->compile();
 
                 $paramString = '';
@@ -96,7 +96,7 @@ class InStep
                     $paramNames
                 ));
 
-                if(!empty($paramNames)) {
+                if (!empty($paramNames)) {
                     $paramString =
                         <<<PHP
                         foreach([{$paramNamesString}] as \$name) {
@@ -107,7 +107,7 @@ class InStep
 
                 $paramString = str_replace("\n", "\n    ", $paramString);
 
-                if($step->segment->isMultiSegment()) {
+                if ($step->segment->isMultiSegment()) {
                     $partPrefix =
                         <<<PHP
                         \$multiParts = \$parts;
@@ -157,13 +157,13 @@ class InStep
 
         $nullOption = '';
 
-        if(
+        if (
             !empty($this->routes) ||
             !empty($dynamics)
         ) {
             $routes = [];
 
-            foreach($this->routes as $route) {
+            foreach ($this->routes as $route) {
                 $methods = $route->methods;
                 $routeClass = get_class($route);
 
@@ -173,15 +173,15 @@ class InStep
                 $routeArgs = Hatch::exportStaticArray($routeData);
                 $defaults = [];
 
-                foreach($route->parameters as $name => $parameter) {
-                    if($parameter->hasDefault()) {
+                foreach ($route->parameters as $name => $parameter) {
+                    if ($parameter->hasDefault()) {
                         $defaults[$name] = $parameter->default;
                     }
                 }
 
                 $defaultsString = Hatch::exportStaticArray($defaults);
 
-                if(!empty($defaults)) {
+                if (!empty($defaults)) {
                     $paramsString =
                         <<<PHP
                         array_merge({$defaultsString}, \$params)
@@ -198,7 +198,7 @@ class InStep
                     return new Hit(\\{$routeClass}::fromArray({$routeArgs}), {$paramsString});
                     PHP;
 
-                if(empty($methods)) {
+                if (empty($methods)) {
                     $routeString = $hitString;
                     break;
                 }
@@ -222,7 +222,7 @@ class InStep
 
             $routeString = implode("\n", $routes);
 
-            if($this->segment?->isMultiSegment()) {
+            if ($this->segment?->isMultiSegment()) {
                 $nullOption =
                     <<<PHP
                     {$routeString}
@@ -240,13 +240,13 @@ class InStep
             }
         }
 
-        if(count($dynamics) === 1) {
+        if (count($dynamics) === 1) {
             $dynamicString = $singleDynamic;
         } else {
             $dynamicString = str_replace("\n", "\n    ", implode("\n", $dynamics));
         }
 
-        if(empty($cases)) {
+        if (empty($cases)) {
             return
                 <<<PHP
                 \$part = array_shift(\$parts);

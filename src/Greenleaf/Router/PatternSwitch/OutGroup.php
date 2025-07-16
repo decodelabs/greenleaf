@@ -16,7 +16,7 @@ class OutGroup
     /**
      * @var array<string,Bidirectional>
      */
-    protected(set) array $routes = [];
+    public protected(set) array $routes = [];
 
     public function mapRoute(
         Bidirectional $route

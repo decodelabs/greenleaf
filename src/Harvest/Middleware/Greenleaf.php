@@ -12,13 +12,11 @@ namespace DecodeLabs\Harvest\Middleware;
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Dispatcher;
-use DecodeLabs\Greenleaf\RouteNotFoundException;
 use DecodeLabs\Greenleaf\Route\Hit;
-use DecodeLabs\Harvest\NotFoundException as HarvestNotFoundException;
 use DecodeLabs\Harvest\Middleware as HarvestMiddleware;
 use DecodeLabs\Harvest\MiddlewareGroup;
+use DecodeLabs\Harvest\NotFoundException as HarvestNotFoundException;
 use DecodeLabs\Monarch;
-use Exception;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Psr\Http\Server\RequestHandlerInterface as PsrHandler;
@@ -49,7 +47,7 @@ class Greenleaf implements
     public function handle(
         PsrRequest $request
     ): PsrResponse {
-        if($hit = $this->getHit($request)) {
+        if ($hit = $this->getHit($request)) {
             return $hit->getRoute()->handleIn(
                 $this->context,
                 $request,
@@ -58,7 +56,7 @@ class Greenleaf implements
         }
 
         throw Exceptional::{'RouteNotFound,Notfound'}(
-            message: 'No route found for: '.$request->getUri()->getPath(),
+            message: 'No route found for: ' . $request->getUri()->getPath(),
             data: $request,
             namespace: 'DecodeLabs\\Greenleaf',
             http: 404
@@ -72,7 +70,7 @@ class Greenleaf implements
         PsrRequest $request,
         PsrHandler $next
     ): PsrResponse {
-        if($hit = $this->getHit($request)) {
+        if ($hit = $this->getHit($request)) {
             return $hit->getRoute()->handleIn(
                 $this->context,
                 $request,
@@ -83,11 +81,11 @@ class Greenleaf implements
         try {
             return $next->handle($request);
         } catch (HarvestNotFoundException $f) {
-            if(Monarch::isDevelopment()) {
+            if (Monarch::isDevelopment()) {
                 // See if rebuilding the router helps
                 $this->context->clearDevCache();
 
-                if($hit = $this->getHit($request)) {
+                if ($hit = $this->getHit($request)) {
                     return $hit->getRoute()->handleIn(
                         $this->context,
                         $request,
@@ -97,7 +95,7 @@ class Greenleaf implements
             }
 
             throw Exceptional::{'RouteNotFound,Notfound'}(
-                message: 'No route found for: '.$request->getUri()->getPath(),
+                message: 'No route found for: ' . $request->getUri()->getPath(),
                 data: $request,
                 namespace: 'DecodeLabs\\Greenleaf',
                 http: 404,

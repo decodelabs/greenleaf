@@ -15,8 +15,6 @@ use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
-use DecodeLabs\Greenleaf\Route\Hit;
-use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
@@ -72,14 +70,14 @@ class Action implements Route, Bidirectional
 
         $this->target = $target;
 
-        if(empty($method)) {
+        if (empty($method)) {
             $method = 'GET';
         }
 
         $this->forMethod(...(array)$method);
 
-        foreach($parameters as $name => $parameter) {
-            if(is_array($parameter)) {
+        foreach ($parameters as $name => $parameter) {
+            if (is_array($parameter)) {
                 $parameter = new Parameter(
                     name: $parameter['name'],
                     validate: $parameter['validate'] ?? null,

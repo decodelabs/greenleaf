@@ -23,8 +23,8 @@ trait PageActionTrait
     ): iterable {
         $path = Monarch::$paths->resolve('@pages/');
 
-        foreach(Atlas::scanFilesRecursive($path, fn(string $file) => str_ends_with($file, '.'.$extension)) as $file) {
-            $name = basename($file->path, '.'.$extension);
+        foreach (Atlas::scanFilesRecursive($path, fn (string $file) => str_ends_with($file, '.' . $extension)) as $file) {
+            $name = basename($file->path, '.' . $extension);
             yield $name => $file;
         }
     }
@@ -32,7 +32,7 @@ trait PageActionTrait
     protected function nameToPattern(
         string $name
     ): string {
-        return match($name) {
+        return match ($name) {
             'index' => '/',
             default => $name
         };

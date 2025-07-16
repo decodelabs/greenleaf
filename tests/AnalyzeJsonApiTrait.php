@@ -18,7 +18,8 @@ class AnalyzeJsonApiTrait implements Action
 {
     use JsonApiTrait;
 
-    public function get(): PsrResponse {
+    public function get(): PsrResponse
+    {
         return new JsonResponse(['foo' => 'bar']);
     }
 }

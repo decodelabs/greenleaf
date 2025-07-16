@@ -12,15 +12,16 @@ namespace DecodeLabs\Greenleaf;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 
-class Request {
-
+class Request
+{
     public function __construct(
         protected(set) LeafUrl $leafUrl,
         protected(set) PsrRequest $httpRequest,
         /** @var array<string,mixed> */
         protected(set) array $parameters,
         protected(set) Route $route
-    ) {}
+    ) {
+    }
 
     public function replaceHttpRequest(
         PsrRequest $httpRequest

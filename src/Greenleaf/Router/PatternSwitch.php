@@ -13,9 +13,9 @@ use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Router;
-use DecodeLabs\Greenleaf\RouterTrait;
 use DecodeLabs\Greenleaf\Router\PatternSwitch\InStep;
 use DecodeLabs\Greenleaf\Router\PatternSwitch\OutMap;
+use DecodeLabs\Greenleaf\RouterTrait;
 use DecodeLabs\Iota;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
@@ -52,7 +52,7 @@ class PatternSwitch implements Caching, Router
 
     protected function getGenerator(): Generator
     {
-        if(!isset($this->generator)) {
+        if (!isset($this->generator)) {
             $this->generator = $this->context->loader->loadGenerator();
         }
 
@@ -63,7 +63,7 @@ class PatternSwitch implements Caching, Router
     {
         $repo = Iota::loadStatic('greenleaf');
 
-        if(!$repo->has('patternSwitch')) {
+        if (!$repo->has('patternSwitch')) {
             $repo->store('patternSwitch', $this->generateSwitchCode());
         }
 
@@ -76,7 +76,7 @@ class PatternSwitch implements Caching, Router
         $repo->purge();
         $generator = $this->getGenerator();
 
-        if($generator instanceof Caching) {
+        if ($generator instanceof Caching) {
             $generator->clearCache();
         }
     }
@@ -96,7 +96,7 @@ class PatternSwitch implements Caching, Router
 
         $uses = array_unique($uses);
         asort($uses);
-        foreach($uses as $key => $class) {
+        foreach ($uses as $key => $class) {
             $uses[$key] = "use $class as $key;";
         }
 
@@ -133,7 +133,7 @@ class PatternSwitch implements Caching, Router
 
     /**
      * @param array<string,Route> $routes
-     * @param array<string> &$uses
+     * @param array<string> $uses
      */
     protected function generateMatchIn(
         array $routes,
@@ -141,12 +141,12 @@ class PatternSwitch implements Caching, Router
     ): string {
         $root = new InStep();
 
-        foreach($routes as $route) {
+        foreach ($routes as $route) {
             $class = get_class($route);
             $key = array_search($class, $uses, true);
 
-            if(!$key) {
-                $key = 'Route'.(count($uses) + 1);
+            if (!$key) {
+                $key = 'Route' . (count($uses) + 1);
                 $uses[$key] = $class;
             }
 
@@ -171,7 +171,7 @@ class PatternSwitch implements Caching, Router
             {$root->generateSwitches()}
             PHP;
 
-        foreach($uses as $key => $class) {
+        foreach ($uses as $key => $class) {
             $output = str_replace("\\$class::", "$key::", $output);
         }
 
@@ -180,7 +180,7 @@ class PatternSwitch implements Caching, Router
 
     /**
      * @param array<string,Route> $routes
-     * @param array<string> &$uses
+     * @param array<string> $uses
      */
     protected function generateMatchOut(
         array $routes,
@@ -188,7 +188,7 @@ class PatternSwitch implements Caching, Router
     ): string {
         $map = new OutMap();
 
-        foreach($routes as $route) {
+        foreach ($routes as $route) {
             $map->mapRoute($route);
         }
 
@@ -201,7 +201,7 @@ class PatternSwitch implements Caching, Router
             {$map->generateSwitches()}
             PHP;
 
-        foreach($uses as $key => $class) {
+        foreach ($uses as $key => $class) {
             $output = str_replace("\\$class::", "$key::", $output);
         }
 
