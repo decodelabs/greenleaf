@@ -16,7 +16,7 @@
         "decodelabs/coercion": "^0.3.3",
         "decodelabs/dictum": "^0.6.10",
         "decodelabs/exceptional": "^0.6.1",
-        "decodelabs/harvest": "^0.5.4",
+        "decodelabs/harvest": "^0.6",
         "decodelabs/iota": "^0.2.4",
         "decodelabs/monarch": "^0.1.4",
         "decodelabs/nuance": "^0.1.2",
