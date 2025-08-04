@@ -32,4 +32,13 @@ trait RouterTrait
             $generator->clearCache();
         }
     }
+
+    public function rebuildCache(): void
+    {
+        $generator = $this->context->loader->loadGenerator();
+
+        if ($generator instanceof Caching) {
+            $generator->rebuildCache();
+        }
+    }
 }

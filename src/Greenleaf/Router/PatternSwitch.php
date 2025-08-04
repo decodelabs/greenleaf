@@ -81,6 +81,12 @@ class PatternSwitch implements Caching, Router
         }
     }
 
+    public function rebuildCache(): void
+    {
+        $this->clearCache();
+        $this->loadSwitches();
+    }
+
     protected function generateSwitchCode(): string
     {
         $routes = $this->collectRoutes($this->getGenerator());

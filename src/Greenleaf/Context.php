@@ -149,6 +149,17 @@ class Context
         }
     }
 
+    public function rebuildDevCache(): void
+    {
+        if (!Monarch::isDevelopment()) {
+            return;
+        }
+
+        if ($this->router instanceof CachingRouter) {
+            $this->router->rebuildCache();
+        }
+    }
+
 
     public function matchIn(
         PsrRequest $request,

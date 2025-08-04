@@ -30,9 +30,11 @@
         "psr/http-server-middleware": "^1.0.2"
     },
     "require-dev": {
+        "decodelabs/commandment": "^0.2.2",
         "decodelabs/guidance": "^0.2.5",
         "decodelabs/pandora": "^0.3.3",
-        "decodelabs/phpstan-decodelabs": "^0.7"
+        "decodelabs/phpstan-decodelabs": "^0.7",
+        "decodelabs/terminus": "^0.13.1"
     },
     "conflict": {
         "decodelabs/guidance": "<0.2",
@@ -47,6 +49,7 @@
         },
         "classmap": [
             "src/Archetype/",
+            "src/Commandment/",
             "src/Harvest/",
             "src/Singularity/"
         ],

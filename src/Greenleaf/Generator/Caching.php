@@ -14,4 +14,5 @@ use DecodeLabs\Greenleaf\Generator;
 interface Caching extends Generator
 {
     public function clearCache(): void;
+    public function rebuildCache(): void;
 }

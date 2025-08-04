@@ -176,4 +176,10 @@ class Collector implements Generator, Caching, Orderable
         $repo = Iota::loadStatic('greenleaf');
         $repo->purge();
     }
+
+    public function rebuildCache(): void
+    {
+        $this->clearCache();
+        $this->loadRouteData();
+    }
 }

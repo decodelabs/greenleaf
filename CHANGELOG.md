@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Unreleased
 - Auto-assign route target when scanned as attribute
+- Added rebuildDevCache() to Context
+- Built route scanner Commandment action
 
 ---
 
