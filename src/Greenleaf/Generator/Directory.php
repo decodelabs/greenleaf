@@ -9,12 +9,14 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Generator;
 
+use DecodeLabs\Archetype\NamespaceList;
 use DecodeLabs\Greenleaf\Action;
 use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
 use DecodeLabs\Greenleaf\Route\Parameter;
+use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use ReflectionClass;
 
 class Directory implements Generator, Orderable
@@ -92,22 +94,27 @@ class Directory implements Generator, Orderable
                 }
 
                 if (is_a($attribute->name, Route::class, true)) {
-                    $routes[] = $attribute->newInstance();
+                    /** @var ActionRoute $route */
+                    $route = $attribute->newInstance();
+                    $arguments = $attribute->getArguments();
+
+                    if (
+                        !isset($arguments['target']) &&
+                        !isset($arguments[1])
+                    ) {
+                        $route->target = new LeafUrl(
+                            $this->getRouteName($class, $namespaces, $ref)
+                        );
+                    }
+
+                    $routes[] = $route;
                     continue;
                 }
             }
 
             if (empty($routes)) {
-                $name = strtolower((string)preg_replace_callback(
-                    '/([a-z])([A-Z])/',
-                    function (array $matches) {
-                        return $matches[1] . '-' . $matches[2];
-                    },
-                    $namespaces->localize($class) ?? $ref->getShortName()
-                ));
-
                 $routes[] = new ActionRoute(
-                    pattern: $name,
+                    pattern: $this->getRouteName($class, $namespaces, $ref),
                     method: 'get'
                 );
             }
@@ -122,5 +129,22 @@ class Directory implements Generator, Orderable
                 yield $route;
             }
         }
+    }
+
+    /**
+     * @param ReflectionClass<Action> $ref
+     */
+    private function getRouteName(
+        string $class,
+        NamespaceList $namespaces,
+        ReflectionClass $ref
+    ): string {
+        return str_replace('\\', '/', strtolower((string)preg_replace_callback(
+            '/([a-z])([A-Z])/',
+            function (array $matches) {
+                return $matches[1] . '-' . $matches[2];
+            },
+            $namespaces->localize($class) ?? $ref->getShortName()
+        )));
     }
 }
