@@ -96,12 +96,18 @@ class InStep
                     $paramNames
                 ));
 
-                if (!empty($paramNames)) {
+                if (count($paramNames) === 1) {
+                    $paramString =
+                        <<<PHP
+                        \$params[{$paramNamesString}] = \$matches[{$paramNamesString}];
+                        PHP;
+                } elseif (!empty($paramNames)) {
                     $paramString =
                         <<<PHP
                         foreach([{$paramNamesString}] as \$name) {
                             \$params[\$name] = \$matches[\$name];
                         }
+
                         PHP;
                 }
 
@@ -179,45 +185,46 @@ class InStep
                     }
                 }
 
-                $defaultsString = Hatch::exportStaticArray($defaults);
-
                 if (!empty($defaults)) {
-                    $paramsString =
+                    $defaultsString = Hatch::exportStaticArray($defaults);
+                    $defaultsString =
                         <<<PHP
-                        array_merge({$defaultsString}, \$params)
+                        \$params = array_merge({$defaultsString}, \$params);
+
                         PHP;
                 } else {
-                    $paramsString =
-                        <<<PHP
-                        \$params
-                        PHP;
+                    $defaultsString = '';
                 }
 
                 if (!empty($route->parameters)) {
                     $hitString =
                         <<<PHP
-                    \$potentialRoute = \\{$routeClass}::fromArray({$routeArgs});
-                    \$valid = true;
+                        {$defaultsString}
+                        \$valid = true;
+                        \$potentialRoute = \\{$routeClass}::fromArray({$routeArgs});
 
-                    foreach(\$potentialRoute->parameters as \$parameter) {
-                        if(!\$parameter->validate(\$params[\$parameter->name])) {
-                            \$valid = false;
-                            break;
+                        foreach(\$potentialRoute->parameters as \$parameter) {
+                            if(!\$parameter->validate(\$params[\$parameter->name])) {
+                                \$valid = false;
+                                break;
+                            }
+
+                            \$params[\$parameter->name] = \$parameter->resolve(\$params[\$parameter->name]);
                         }
 
-                        \$params[\$parameter->name] = \$parameter->resolve(\$params[\$parameter->name]);
-                    }
-
-                    if(\$valid) {
-                        return new Hit(\$potentialRoute, {$paramsString});
-                    }
-                    PHP;
+                        if(\$valid) {
+                            return new Hit(\$potentialRoute, \$params);
+                        }
+                        PHP;
                 } else {
                     $hitString =
                         <<<PHP
-                        return new Hit(\\{$routeClass}::fromArray({$routeArgs}), {$paramsString});
+                        {$defaultsString}
+                        return new Hit(\\{$routeClass}::fromArray({$routeArgs}), \$params);
                         PHP;
                 }
+
+                $hitString = trim($hitString);
 
                 if (empty($methods)) {
                     $routeString = $hitString;
@@ -251,37 +258,53 @@ class InStep
             } else {
                 $routeString = str_replace("\n", "\n    ", $routeString);
 
+                if (!empty($routeString)) {
+                    $routeString .= "\n\n";
+                }
+
+                $routeString .=
+                    <<<PHP
+                        return null;
+                    PHP;
+
                 $nullOption =
                     <<<PHP
                     if(\$part === null) {
                         {$routeString}
-                        return null;
                     }
                     PHP;
             }
         }
 
         if (count($dynamics) === 1) {
-            $dynamicString = $singleDynamic;
+            $dynamicString = $singleDynamic . "\n";
         } else {
-            $dynamicString = str_replace("\n", "\n    ", implode("\n", $dynamics));
+            $dynamicString = implode("\n", $dynamics) . "\n";
         }
+
+        $dynamicString .=
+            <<<PHP
+            return null;
+            PHP;
+
+        $dynamicString = trim($dynamicString);
 
         if (empty($cases)) {
             return
                 <<<PHP
                 \$part = array_shift(\$parts);
+
                 {$nullOption}
                 {$dynamicString}
-                return null;
                 PHP;
         }
+
+        $dynamicString = str_replace("\n", "\n    ", $dynamicString);
 
         $cases[] =
             <<<PHP
             default:
                 {$dynamicString}
-                return null;
             PHP;
 
         $caseString = str_replace("\n", "\n    ", implode("\n\n", $cases));
@@ -289,6 +312,7 @@ class InStep
         return
             <<<PHP
             \$part = array_shift(\$parts);
+
             {$nullOption}
             switch(\$part) {
                 {$caseString}

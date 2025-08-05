@@ -92,13 +92,15 @@ class PatternSwitch implements Caching, Router
         $routes = $this->collectRoutes($this->getGenerator());
         $uses = [];
 
-        $matchInString = str_replace("\n", "\n        ", $this->generateMatchIn($routes, $uses));
+        $matchInString = str_replace("\n", "\n            ", $this->generateMatchIn($routes, $uses));
         $matchOutString = str_replace("\n", "\n        ", $this->generateMatchOut($routes, $uses));
 
         $uses['Hit'] = 'DecodeLabs\Greenleaf\Route\Hit';
         $uses['Router'] = 'DecodeLabs\Greenleaf\Router';
+        $uses['Monarch'] = 'DecodeLabs\Monarch';
         $uses['LeafUrl'] = 'DecodeLabs\Singularity\Url\Leaf';
         $uses['PsrRequest'] = 'Psr\Http\Message\ServerRequestInterface';
+        $uses['Throwable'] = 'Throwable';
 
         $uses = array_unique($uses);
         asort($uses);
@@ -122,7 +124,15 @@ class PatternSwitch implements Caching, Router
             public function matchIn(
                 PsrRequest \$request
             ): ?Hit {
-                {$matchInString};
+                try {
+                    {$matchInString};
+                } catch (Throwable \$e) {
+                    if (Monarch::isDevelopment()) {
+                        dd(\$e);
+                    }
+
+                    throw \$e;
+                }
             }
 
             public function matchOut(
@@ -167,11 +177,13 @@ class PatternSwitch implements Caching, Router
         $output =
             <<<PHP
             \$path = ltrim(\$request->getUri()->getPath(), '/');
+
             if (\$path === '') {
                 \$parts = [];
             } else {
                 \$parts = explode('/', \$path);
             }
+
             \$params = [];
             \$method = \$request->getMethod();
             {$root->generateSwitches()}
@@ -201,9 +213,11 @@ class PatternSwitch implements Caching, Router
         $output =
             <<<PHP
             \$parameters ??= [];
+
             if (is_string(\$uri)) {
                 \$uri = LeafUrl::fromString(\$uri);
             }
+
             {$map->generateSwitches()}
             PHP;
 
