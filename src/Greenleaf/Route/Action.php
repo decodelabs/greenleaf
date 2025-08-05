@@ -32,7 +32,7 @@ class Action implements Route, Bidirectional
      *     pattern: string|Pattern,
      *     target?: string|LeafUrl|null,
      *     methods?: string|array<string>,
-     *     parameters?: array<Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}>
+     *     parameters?: array<Parameter|array<string,mixed>>
      * } $data
      */
     public static function fromArray(
@@ -50,7 +50,7 @@ class Action implements Route, Bidirectional
      * Init with properties
      *
      * @param string|array<string> $method
-     * @param array<Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}> $parameters
+     * @param array<Parameter|array<string,mixed>> $parameters
      */
     final public function __construct(
         string|Pattern $pattern,
@@ -76,13 +76,9 @@ class Action implements Route, Bidirectional
 
         $this->forMethod(...(array)$method);
 
-        foreach ($parameters as $name => $parameter) {
+        foreach ($parameters as $parameter) {
             if (is_array($parameter)) {
-                $parameter = new Parameter(
-                    name: $parameter['name'],
-                    validate: $parameter['validate'] ?? null,
-                    default: $parameter['default'] ?? null
-                );
+                $parameter = Parameter::fromArray($parameter);
             }
 
             $this->addParameter($parameter);

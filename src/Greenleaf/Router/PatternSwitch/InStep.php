@@ -193,10 +193,31 @@ class InStep
                         PHP;
                 }
 
-                $hitString =
-                    <<<PHP
-                    return new Hit(\\{$routeClass}::fromArray({$routeArgs}), {$paramsString});
+                if (!empty($route->parameters)) {
+                    $hitString =
+                        <<<PHP
+                    \$potentialRoute = \\{$routeClass}::fromArray({$routeArgs});
+                    \$valid = true;
+
+                    foreach(\$potentialRoute->parameters as \$parameter) {
+                        if(!\$parameter->validate(\$params[\$parameter->name])) {
+                            \$valid = false;
+                            break;
+                        }
+
+                        \$params[\$parameter->name] = \$parameter->resolve(\$params[\$parameter->name]);
+                    }
+
+                    if(\$valid) {
+                        return new Hit(\$potentialRoute, {$paramsString});
+                    }
                     PHP;
+                } else {
+                    $hitString =
+                        <<<PHP
+                        return new Hit(\\{$routeClass}::fromArray({$routeArgs}), {$paramsString});
+                        PHP;
+                }
 
                 if (empty($methods)) {
                     $routeString = $hitString;

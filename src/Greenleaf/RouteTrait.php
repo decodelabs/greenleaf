@@ -13,7 +13,6 @@ use Closure;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Route\Parameter;
-use DecodeLabs\Greenleaf\Route\Parameter\Validator;
 use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
@@ -53,11 +52,10 @@ trait RouteTrait
     }
 
     public function with(
-        string $name,
-        string|array|Validator|null $validate = null,
-        ?string $default = null
+        mixed ...$args
     ): static {
-        $parameter = new Parameter($name, $validate, $default);
+        /** @var array<string,mixed> $args */
+        $parameter = Parameter::fromArray($args);
         $this->addParameter($parameter);
         return $this;
     }

@@ -51,7 +51,7 @@ class Page implements Route, Bidirectional
      * Init with properties
      *
      * @param string|array<string> $method
-     * @param array<Parameter|array{name:string,validate?:string|array<string,mixed>|null,default?:?string}> $parameters
+     * @param array<Parameter|array<string,mixed>> $parameters
      */
     final public function __construct(
         string|Pattern $pattern,
@@ -74,11 +74,7 @@ class Page implements Route, Bidirectional
 
         foreach ($parameters as $name => $parameter) {
             if (is_array($parameter)) {
-                $parameter = new Parameter(
-                    name: $parameter['name'],
-                    validate: $parameter['validate'] ?? null,
-                    default: $parameter['default'] ?? null
-                );
+                $parameter = Parameter::fromArray($parameter);
             }
 
             $this->addParameter($parameter);

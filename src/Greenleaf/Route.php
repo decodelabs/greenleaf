@@ -11,7 +11,6 @@ namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Route\Parameter;
-use DecodeLabs\Greenleaf\Route\Parameter\Validator;
 use DecodeLabs\Greenleaf\Route\Pattern;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use JsonSerializable;
@@ -42,13 +41,10 @@ interface Route extends JsonSerializable
     ): static;
 
     /**
-     * @param string|array<string, mixed>|Validator|null $validate
      * @return $this
      */
     public function with(
-        string $name,
-        string|array|Validator|null $validate = null,
-        ?string $default = null
+        string $name
     ): static;
 
     public function parseParameters(): void;

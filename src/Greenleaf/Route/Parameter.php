@@ -10,71 +10,58 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\Route;
 
 use Attribute;
-use DecodeLabs\Greenleaf\Route\Parameter\Validator;
-use DecodeLabs\Greenleaf\Route\Parameter\ValidatorAbstract;
+use DecodeLabs\Archetype;
+use DecodeLabs\Coercion;
 use JsonSerializable;
 
 #[Attribute]
 class Parameter implements JsonSerializable
 {
     public protected(set) readonly string $name;
-    public ?Validator $validator;
     public ?string $default = null;
 
     /**
-     * Init with properties
-     *
-     * @param string|array<string, mixed>|Validator|null $validate
+     * @param array<string,mixed> $data
      */
+    public static function fromArray(
+        array $data
+    ): Parameter {
+        if (isset($data['type'])) {
+            $type = Coercion::asString($data['type']);
+            unset($data['type']);
+            $class = Archetype::resolve(Parameter::class, ucfirst($type));
+        } else {
+            $class = self::class;
+        }
+
+        // @phpstan-ignore-next-line
+        return new $class(...$data);
+    }
+
     public function __construct(
         string $name,
-        string|array|Validator|null $validate = null,
         ?string $default = null
     ) {
         $this->name = $name;
-        $this->validator = ValidatorAbstract::create($validate);
         $this->default = $default;
     }
 
 
-    /**
-     * Has default
-     */
     public function hasDefault(): bool
     {
         return $this->default !== null;
     }
 
-
-    /**
-     * Is multi segment
-     */
     public function isMultiSegment(): bool
     {
-        if (!$this->validator) {
-            return false;
-        }
-
-        return $this->validator->isMultiSegment();
+        return false;
     }
 
-
-    /**
-     * Get regex fragment
-     */
     public function getRegexFragment(): string
     {
-        if ($this->validator) {
-            return $this->validator->getRegexFragment($this->name);
-        }
-
         return '(?P<' . $this->name . '>\w+)';
     }
 
-
-    /**
-     * Validate value
-     */
     public function validate(
         ?string $value
     ): bool {
@@ -86,28 +73,13 @@ class Parameter implements JsonSerializable
             $value = $this->default;
         }
 
-        if ($this->validator) {
-            return $this->validator->validate($value);
-        }
-
         return true;
     }
 
-    /**
-     * Resolve value
-     */
     public function resolve(
         ?string $value
     ): mixed {
-        if ($value === null) {
-            $value = $this->default;
-        }
-
-        if ($this->validator) {
-            $value = $this->validator->resolve($value);
-        }
-
-        return $value;
+        return $value ?? $this->default;
     }
 
     /**
@@ -117,7 +89,6 @@ class Parameter implements JsonSerializable
     {
         return [
             'name' => $this->name,
-            'validate' => $this->validator?->jsonSerialize(),
             'default' => $this->default,
         ];
     }
