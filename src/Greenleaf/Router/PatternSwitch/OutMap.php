@@ -98,35 +98,45 @@ class OutMap
         return
             <<<PHP
             \$groupData = [];
+
             switch(\$uri->getPath()) {
                 {$caseString}
             }
+
             \$origQuery = \$uri->parseQuery();
+
             foreach(\$groupData as \$group) {
                 foreach(\$group['queryKeys'] as \$key) {
                     if(!isset(\$origQuery->{\$key})) {
                         continue 2;
                     }
                 }
+
                 \$query = clone \$origQuery;
                 \$params = [];
+
                 foreach(\$query as \$key => \$node) {
                     if(!is_string(\$key) || !\$node->hasValue()) {
                         continue;
                     }
+
                     if(in_array(\$key, \$group['queryKeys'])) {
                         unset(\$query->{\$key});
                         continue;
                     }
+
                     if(in_array(\$key, \$group['paramNames'])) {
                         \$params[\$key] = \$node->getValue();
                         unset(\$query->{\$key});
                         continue;
                     }
+
                     continue 2;
                 }
+
                 \$params = array_merge(\$params, \$parameters);
                 \$route = \$group['route']();
+
                 foreach(\$route->parameters as \$name => \$parameter) {
                     if(isset(\$params[\$name])) {
                         continue;
@@ -139,6 +149,13 @@ class OutMap
 
                     continue 2;
                 }
+
+                foreach(\$params as \$name => \$value) {
+                    if(!array_key_exists(\$name, \$route->parameters)) {
+                        \$query->{\$name} = \$value;
+                    }
+                }
+
                 return new Hit(\$route, \$params, \$query->toDelimitedString());
             }
             return null;
