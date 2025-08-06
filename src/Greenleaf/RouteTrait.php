@@ -230,7 +230,7 @@ trait RouteTrait
     }
 
     /**
-     * @param array<string,string|Stringable|int|float|null> $parameters
+     * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     public function matchOut(
         string|LeafUrl $uri,
@@ -242,7 +242,7 @@ trait RouteTrait
 
 
     /**
-     * @param array<string,string|Stringable|int|float|null> $parameters
+     * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     protected function matchActionOut(
         string|LeafUrl $uri,

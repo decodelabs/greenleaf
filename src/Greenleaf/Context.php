@@ -238,13 +238,13 @@ class Context
      */
     public function url(
         string|LeafUrl $uri,
-        string|Stringable|int|float|null ...$parameters
+        string|Stringable|int|float|bool|null ...$parameters
     ): Url {
         if (is_string($uri)) {
             $uri = LeafUrl::fromString($uri);
         }
 
-        /** @var array<string,string|Stringable|int|float|null> $parameters */
+        /** @var array<string,string|Stringable|int|float|bool|null> $parameters */
         if (!$hit = $this->router->matchOut($uri, $parameters)) {
             throw Exceptional::RouteNotMatched(
                 message: 'Unable to match uri to route'
@@ -252,7 +252,7 @@ class Context
         }
 
         $route = $hit->getRoute();
-        /** @var array<string,string|Stringable|float|int|null> */
+        /** @var array<string,string|Stringable|float|int|bool|null> */
         $parameters = $hit->parameters;
         $segments = $route->pattern->parseSegments();
 

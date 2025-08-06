@@ -193,7 +193,7 @@ class Segment implements
     /**
      * Convert back to string
      *
-     * @param array<string, string|Stringable|int|float|null> $parameters
+     * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     public function resolve(
         array $parameters
@@ -214,7 +214,11 @@ class Segment implements
                 );
             }
 
-            $output[] = Coercion::asString($parameters[$name]);
+            if (is_bool($parameters[$name])) {
+                $output[] = $name;
+            } else {
+                $output[] = Coercion::asString($parameters[$name]);
+            }
         }
 
         return implode('', $output);

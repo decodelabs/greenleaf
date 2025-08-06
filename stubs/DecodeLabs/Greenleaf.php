@@ -55,7 +55,7 @@ class Greenleaf implements Proxy
     public static function matchOut(Ref4|string $uri, ?array $parameters = NULL): Ref3 {
         return static::$_veneerInstance->matchOut(...func_get_args());
     }
-    public static function url(Ref4|string $uri, Ref5|string|int|float|null ...$parameters): Ref6 {
+    public static function url(Ref4|string $uri, Ref5|string|int|float|bool|null ...$parameters): Ref6 {
         return static::$_veneerInstance->url(...func_get_args());
     }
     public static function action(string $pattern, ?string $target = NULL): Ref7 {
