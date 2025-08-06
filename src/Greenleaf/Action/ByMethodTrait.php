@@ -21,6 +21,30 @@ trait ByMethodTrait
 {
     use ActionTrait;
 
+    public function scanSupportedMethods(): iterable
+    {
+        $output = [];
+        $classMethods = get_class_methods($this);
+
+        foreach (HarvestRequest::Methods as $method) {
+            $method = strtolower($method);
+
+            if (method_exists($this, $method)) {
+                $output[] = $method;
+                continue;
+            }
+
+            foreach ($classMethods as $classMethod) {
+                if (str_starts_with($classMethod, $method . 'By')) {
+                    $output[] = $method;
+                    continue 2;
+                }
+            }
+        }
+
+        return $output;
+    }
+
     /**
      * Handle HTTP request
      */

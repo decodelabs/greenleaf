@@ -67,6 +67,11 @@ trait ActionTrait
         return $output;
     }
 
+    public function scanSupportedMethods(): iterable
+    {
+        return HarvestRequest::Methods;
+    }
+
     /**
      * @return array<ReflectionAttribute<Middleware>>
      */

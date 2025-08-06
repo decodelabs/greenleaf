@@ -87,6 +87,9 @@ class Directory implements Generator, Orderable
             /** @var array<Parameter> */
             $parameters = [];
 
+            $action = new $class($this->context);
+            $supportedMethods = iterator_to_array($action->scanSupportedMethods());
+
             foreach ($attributes as $attribute) {
                 if (is_a($attribute->name, Parameter::class, true)) {
                     $parameters[] = $attribute->newInstance();
@@ -107,6 +110,13 @@ class Directory implements Generator, Orderable
                         );
                     }
 
+                    if (
+                        !isset($arguments['method']) ||
+                        !isset($arguments[2])
+                    ) {
+                        $route->forMethod(...$supportedMethods);
+                    }
+
                     $routes[] = $route;
                     continue;
                 }
@@ -115,7 +125,7 @@ class Directory implements Generator, Orderable
             if (empty($routes)) {
                 $routes[] = new ActionRoute(
                     pattern: $this->getRouteName($class, $namespaces, $ref),
-                    method: 'get'
+                    method: $supportedMethods
                 );
             }
 

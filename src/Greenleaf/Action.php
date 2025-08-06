@@ -22,6 +22,11 @@ interface Action
         LeafRequest $request
     ): ?MiddlewareProfile;
 
+    /**
+     * @return iterable<string>
+     */
+    public function scanSupportedMethods(): iterable;
+
     public function execute(
         LeafRequest $request
     ): mixed;
