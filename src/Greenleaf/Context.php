@@ -252,16 +252,21 @@ class Context
         }
 
         $route = $hit->getRoute();
-        /** @var array<string,string|Stringable|float|int|bool|null> */
-        $parameters = $hit->parameters;
-        $segments = $route->pattern->parseSegments();
 
-        foreach ($segments as $i => $segment) {
-            $segments[$i] = $segment->resolve($parameters);
+        if (!empty($hit->parameters)) {
+            /** @var array<string,string|Stringable|float|int|bool|null> */
+            $parameters = $hit->parameters;
+            $segments = $route->pattern->parseSegments();
+
+            foreach ($segments as $i => $segment) {
+                $segments[$i] = $segment->resolve($parameters);
+            }
+
+            /** @var array<string> $segments */
+            $path = implode('/', $segments);
+        } else {
+            $path = (string)$route->pattern;
         }
-
-        /** @var array<string> $segments */
-        $path = implode('/', $segments);
 
         if (!str_starts_with($path, '/')) {
             $path = '/' . $path;

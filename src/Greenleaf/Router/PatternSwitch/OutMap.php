@@ -21,6 +21,11 @@ class OutMap
      */
     public protected(set) array $groups = [];
 
+    /**
+     * @var array<string,string>
+     */
+    public protected(set) array $staticRoutes = [];
+
     public function mapRoute(
         Route $route
     ): void {
@@ -36,13 +41,45 @@ class OutMap
 
         $group = $this->groups[$path];
         $group->mapRoute($route);
+
+
+        if (
+            empty($route->parameters) &&
+            !$route->target->hasQuery()
+        ) {
+            $this->staticRoutes[$path] = (string)$route->pattern;
+        }
     }
 
     public function generateSwitches(): string
     {
+        // Cases
         $cases = [];
 
         foreach ($this->groups as $path => $group) {
+            if (
+                isset($this->staticRoutes[$path]) &&
+                count($group->routes) === 1
+            ) {
+                $route = $group->routes[array_key_first($group->routes)];
+                /** @var array<string,string|array<mixed>> $data */
+                $data = $route->jsonSerialize();
+                $class = Coercion::asString($data['class']);
+                unset($data['class']);
+                $data = str_replace("\n", "\n        ", Hatch::exportStaticArray($data));
+
+                $cases[] =
+                    <<<PHP
+                    case '$path':
+                        return new Hit(
+                            route: \\$class::fromArray({$data}),
+                            parameters: [],
+                        );
+                    PHP;
+
+                continue;
+            }
+
             $groupData = [];
             $routeData = [];
 
