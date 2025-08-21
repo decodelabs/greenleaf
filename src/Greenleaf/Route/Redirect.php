@@ -10,10 +10,10 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\Route;
 
 use Attribute;
-use DecodeLabs\Greenleaf\Context;
+use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\RouteTrait;
-use DecodeLabs\Harvest;
+use DecodeLabs\Harvest\Response\Redirect as RedirectResponse;
 use DecodeLabs\Singularity;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
@@ -40,7 +40,8 @@ class Redirect implements Route
      * } $data
      */
     public static function fromArray(
-        array $data
+        array $data,
+        Archetype $archetype
     ): static {
         return new static(
             pattern: $data['pattern'],
@@ -51,8 +52,6 @@ class Redirect implements Route
     }
 
     /**
-     * Init with properties
-     *
      * @param bool|array<string> $mapQuery
      */
     final public function __construct(
@@ -69,8 +68,6 @@ class Redirect implements Route
 
 
     /**
-     * Set map query
-     *
      * @param bool|array<string> $map
      * @return $this
      */
@@ -88,21 +85,15 @@ class Redirect implements Route
         return $this;
     }
 
-    /**
-     * Should map query
-     */
     public function isQueryMapped(): bool
     {
         return $this->mapQuery !== false;
     }
 
-    /**
-     * Handle request
-     */
     public function handleIn(
-        Context $context,
         PsrRequest $request,
-        array $parameters
+        array $parameters,
+        Archetype $archetype,
     ): PsrResponse {
         $currentUrl = $request->getUri();
         $url = Singularity::url($this->target, $currentUrl);
@@ -128,7 +119,7 @@ class Redirect implements Route
             $url = $url->withQuery($query);
         }
 
-        return Harvest::redirect(
+        return new RedirectResponse(
             $url,
             $this->permanent ? 301 : 302
         );

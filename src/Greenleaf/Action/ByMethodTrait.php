@@ -12,8 +12,8 @@ namespace DecodeLabs\Greenleaf\Action;
 use Closure;
 use DecodeLabs\Greenleaf\ActionTrait;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
-use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Request as HarvestRequest;
+use DecodeLabs\Harvest\Response\Text as TextResponse;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Throwable;
 
@@ -45,9 +45,6 @@ trait ByMethodTrait
         return $output;
     }
 
-    /**
-     * Handle HTTP request
-     */
     public function execute(
         LeafRequest $request
     ): mixed {
@@ -90,18 +87,12 @@ trait ByMethodTrait
     }
 
 
-    /**
-     * Handle HTTP OPTIONS request
-     */
     public function options(
         LeafRequest $request
     ): mixed {
         return $this->handleUnknownMethod($request);
     }
 
-    /**
-     * Handle unknown HTTP method
-     */
     protected function handleUnknownMethod(
         LeafRequest $request
     ): mixed {
@@ -131,7 +122,7 @@ trait ByMethodTrait
             }
         }
 
-        return Harvest::text('', $method === 'OPTIONS' ? 200 : 405, [
+        return new TextResponse('', $method === 'OPTIONS' ? 200 : 405, [
             'Allow' => implode(', ', $methods),
             'Access-Control-Allow-Methods' => implode(', ', $methods),
         ]);

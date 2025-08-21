@@ -9,11 +9,13 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Generator;
 
+use DecodeLabs\Archetype;
 use DecodeLabs\Coercion;
-use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Iota;
+use DecodeLabs\Iota\Repository as IotaRepository;
+use DecodeLabs\Slingshot;
 
 class Collector implements Generator, Caching, Orderable
 {
@@ -27,18 +29,19 @@ class Collector implements Generator, Caching, Orderable
         Pages::class,
     ];
 
-    protected Context $context;
+    protected IotaRepository $iotaRepo;
 
     public function __construct(
-        Context $context
+        protected Archetype $archetype,
+        Iota $iota
     ) {
-        $this->context = $context;
+        $this->iotaRepo = $iota->loadStatic('greenleaf');
     }
 
     public function addGenerator(
         string $name
     ): void {
-        $class = $this->context->archetype->resolve(Generator::class, $name);
+        $class = $this->archetype->resolve(Generator::class, $name);
 
         if (!in_array($class, $this->generatorNames)) {
             return;
@@ -54,7 +57,7 @@ class Collector implements Generator, Caching, Orderable
         foreach ($routes as $i => $route) {
             /** @var class-string<Route> */
             $class = $route['class'];
-            yield $class::fromArray($route);
+            yield $class::fromArray($route, $this->archetype);
         }
     }
 
@@ -63,13 +66,11 @@ class Collector implements Generator, Caching, Orderable
      */
     protected function loadRouteData(): array
     {
-        $repo = Iota::loadStatic('greenleaf');
-
-        if ($repo->has('routes')) {
-            $output = $repo->return('routes');
+        if ($this->iotaRepo->has('routes')) {
+            $output = $this->iotaRepo->return('routes');
         } else {
             $output = $this->generateRouteData();
-            $repo->storeStaticArray('routes', $output);
+            $this->iotaRepo->storeStaticArray('routes', $output);
         }
 
         /** @var array<array<string,mixed>> */
@@ -149,10 +150,10 @@ class Collector implements Generator, Caching, Orderable
     protected function scanGenerators(): iterable
     {
         $classes = $generators = [];
-        $slingshot = $this->context->newSlingshot();
+        $slingshot = new Slingshot();
 
         foreach ($this->generatorNames as $name) {
-            $class = $this->context->archetype->resolve(Generator::class, $name);
+            $class = $this->archetype->resolve(Generator::class, $name);
 
             if (in_array($class, $classes)) {
                 continue;
@@ -173,8 +174,7 @@ class Collector implements Generator, Caching, Orderable
 
     public function clearCache(): void
     {
-        $repo = Iota::loadStatic('greenleaf');
-        $repo->purge();
+        $this->iotaRepo->purge();
     }
 
     public function rebuildCache(): void

@@ -72,7 +72,7 @@ class OutMap
                     <<<PHP
                     case '$path':
                         return new Hit(
-                            route: \\$class::fromArray({$data}),
+                            route: \\$class::fromArray({$data}, \$this->archetype),
                             parameters: [],
                         );
                     PHP;
@@ -107,7 +107,7 @@ class OutMap
 
                 $routeString =
                     <<<PHP
-                    fn() => \\$class::fromArray({$routeString})
+                    fn() => \\$class::fromArray({$routeString}, \$this->archetype)
                     PHP;
 
                 $routeString = str_replace("\n", "\n        ", $routeString);

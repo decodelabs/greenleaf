@@ -7,57 +7,64 @@
 
 declare(strict_types=1);
 
-namespace DecodeLabs\Greenleaf;
+namespace DecodeLabs;
 
-use DecodeLabs\Archetype\Handler as ArchetypeHandler;
 use DecodeLabs\Archetype\Resolver\Greenleaf as GreenleafResolver;
-use DecodeLabs\Exceptional;
-use DecodeLabs\Greenleaf;
-use DecodeLabs\Greenleaf\Context\Loader;
-use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
+use DecodeLabs\Greenleaf\Action;
+use DecodeLabs\Greenleaf\Dispatcher;
+use DecodeLabs\Greenleaf\Generator;
+use DecodeLabs\Greenleaf\Generator\Collector;
 use DecodeLabs\Greenleaf\Route\Hit;
-use DecodeLabs\Greenleaf\Route\Page as PageRoute;
 use DecodeLabs\Greenleaf\Route\Redirect as RedirectRoute;
+use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Greenleaf\Router\Caching as CachingRouter;
+use DecodeLabs\Greenleaf\Router\PatternSwitch;
 use DecodeLabs\Harvest\Middleware\Greenleaf as GreenleafMiddleware;
-use DecodeLabs\Monarch;
-use DecodeLabs\Pandora\Container as PandoraContainer;
+use DecodeLabs\Iota\Repository as IotaRepository;
+use DecodeLabs\Kingdom\ContainerAdapter;
+use DecodeLabs\Kingdom\Service;
+use DecodeLabs\Kingdom\ServiceTrait;
 use DecodeLabs\Singularity\Url;
 use DecodeLabs\Singularity\Url\Http as HttpUrl;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
-use DecodeLabs\Slingshot;
-use DecodeLabs\Veneer;
-use DecodeLabs\Veneer\Plugin;
-use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
 
-class Context
+class Greenleaf implements Service
 {
+    use ServiceTrait;
+
     protected const Archetypes = [
         Generator::class => [],
         Action::class => ['named' => false],
     ];
 
-    #[Plugin]
-    public ArchetypeHandler $archetype;
+    public protected(set) IotaRepository $iotaRepo;
 
-    #[Plugin]
-    public Loader $loader;
+    public static function provideService(
+        ContainerAdapter $container
+    ): static {
+        if (!$container->has(Router::class)) {
+            $container->setType(Router::class, PatternSwitch::class);
+        }
 
-    #[Plugin]
-    public Router $router;
+        if (!$container->has(Generator::class)) {
+            $container->setType(Generator::class, Collector::class);
+        }
 
-    public ?Container $container = null;
-
-    protected string $defaultPageType = 'html';
+        return $container->getOrCreate(static::class);
+    }
 
     public function __construct(
-        ?Container $container = null,
-        ?ArchetypeHandler $archetype = null
+        protected(set) Router $router,
+        protected(set) Generator $generator,
+        protected(set) Archetype $archetype,
+        Iota $iota
     ) {
-        $this->archetype = $archetype ?? new ArchetypeHandler();
-        $this->container = $container;
+        $this->iotaRepo = Coercion::newLazyProxy(
+            IotaRepository::class,
+            fn () => $iota->loadStatic('greenleaf')
+        );
 
         foreach (self::Archetypes as $interface => $options) {
             $options['interface'] = $interface;
@@ -68,41 +75,12 @@ class Context
             );
         }
 
-        $this->loader = $this->initLoader();
-        $this->router = $this->loader->loadRouter();
+        $this->router = $router;
+        $paths = Monarch::getPaths();
 
-        if (!Monarch::$paths->hasAlias('@pages')) {
-            Monarch::$paths->alias('@pages', '@run/src/@components/pages');
+        if (!$paths->hasAlias('@pages')) {
+            $paths->alias('@pages', '@run/src/@components/pages');
         }
-    }
-
-    protected function initLoader(): Loader
-    {
-        $loader = null;
-
-        // Load loader
-        if ($this->container instanceof PandoraContainer) {
-            $loader = $this->container->tryGetWith(Loader::class, [
-                'context' => $this,
-                'archetype' => $this->archetype,
-                'container' => $this->container
-            ]);
-        } elseif (
-            $this->container &&
-            $this->container->has(Loader::class)
-        ) {
-            if (!($loader = $this->container->get(Loader::class))
-                instanceof Loader) {
-                $loader = null;
-            }
-        }
-
-        if (!$loader) {
-            $class = $this->archetype->resolve(Loader::class);
-            $loader = new $class($this);
-        }
-
-        return $loader;
     }
 
 
@@ -110,32 +88,6 @@ class Context
     {
         return new GreenleafMiddleware($this);
     }
-
-    public function newSlingshot(): Slingshot
-    {
-        $slingshot = new Slingshot($this->container);
-        $slingshot->addType($this);
-
-        // @phpstan-ignore-next-line
-        if (isset($this->router)) {
-            $slingshot->addType($this->router);
-        }
-
-        return $slingshot;
-    }
-
-
-    public function setDefaultPageType(
-        string $type
-    ): void {
-        $this->defaultPageType = $type;
-    }
-
-    public function getDefaultPageType(): string
-    {
-        return $this->defaultPageType;
-    }
-
 
 
     public function clearDevCache(): void
@@ -179,9 +131,6 @@ class Context
         return null;
     }
 
-    /**
-     * Test if tailing / affects match
-     */
     protected function testDirMatch(
         PsrRequest $request
     ): ?Hit {
@@ -208,8 +157,6 @@ class Context
     }
 
     /**
-     * Load route for URI
-     *
      * @param array<string,string|Stringable|int|float|null>|null $parameters
      */
     public function matchOut(
@@ -221,7 +168,7 @@ class Context
         }
 
         if (!$hit = $this->router->matchOut($uri, $parameters)) {
-            throw Exceptional::RouteNotMatched(
+            throw Exceptional::{'./Greenleaf/RouteNotMatched'}(
                 message: 'Unable to match uri to route'
             );
         }
@@ -232,8 +179,6 @@ class Context
 
 
     /**
-     * Create URL from uri
-     *
      * @param string|Stringable|int|float|null ...$parameters
      */
     public function url(
@@ -246,7 +191,7 @@ class Context
 
         /** @var array<string,string|Stringable|int|float|bool|null> $parameters */
         if (!$hit = $this->router->matchOut($uri, $parameters)) {
-            throw Exceptional::RouteNotMatched(
+            throw Exceptional::{'./Greenleaf/RouteNotMatched'}(
                 message: 'Unable to match uri to route'
             );
         }
@@ -279,44 +224,4 @@ class Context
             fragment: $uri->getFragment(),
         );
     }
-
-
-
-
-    /**
-     * Create action route
-     */
-    public function action(
-        string $pattern,
-        ?string $target = null
-    ): ActionRoute {
-        return new ActionRoute($pattern, $target);
-    }
-
-    /**
-     * Create page route
-     */
-    public function page(
-        string $pattern,
-        ?string $target = null
-    ): PageRoute {
-        return new PageRoute($pattern, $target);
-    }
-
-    /**
-     * Create redirect route
-     */
-    public function redirect(
-        string $pattern,
-        string $target
-    ): RedirectRoute {
-        return new RedirectRoute($pattern, $target);
-    }
 }
-
-
-// Veneer
-Veneer\Manager::getGlobalManager()->register(
-    Context::class,
-    Greenleaf::class
-);

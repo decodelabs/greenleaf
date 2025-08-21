@@ -21,7 +21,7 @@ trait PageActionTrait
     protected function scanPageFiles(
         string $extension
     ): iterable {
-        $path = Monarch::$paths->resolve('@pages/');
+        $path = Monarch::getPaths()->resolve('@pages/');
 
         foreach (Atlas::scanFilesRecursive($path, fn (string $file) => str_ends_with($file, '.' . $extension)) as $file) {
             $name = basename($file->path, '.' . $extension);

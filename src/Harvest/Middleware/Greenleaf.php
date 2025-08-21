@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace DecodeLabs\Harvest\Middleware;
 
 use DecodeLabs\Exceptional;
-use DecodeLabs\Greenleaf\Context;
+use DecodeLabs\Greenleaf as GreenleafService;
 use DecodeLabs\Greenleaf\Dispatcher;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Harvest\Middleware as HarvestMiddleware;
@@ -33,25 +33,20 @@ class Greenleaf implements
         get => 0;
     }
 
-    protected Context $context;
 
     public function __construct(
-        Context $context
+        protected GreenleafService $greenleaf,
     ) {
-        $this->context = $context;
     }
 
-    /**
-     * Begin stage stack navigation
-     */
     public function handle(
         PsrRequest $request
     ): PsrResponse {
         if ($hit = $this->getHit($request)) {
             return $hit->getRoute()->handleIn(
-                $this->context,
                 $request,
-                $hit->parameters
+                $hit->parameters,
+                $this->greenleaf->archetype,
             );
         }
 
@@ -63,18 +58,15 @@ class Greenleaf implements
         );
     }
 
-    /**
-     * Handle request
-     */
     public function process(
         PsrRequest $request,
         PsrHandler $next
     ): PsrResponse {
         if ($hit = $this->getHit($request)) {
             return $hit->getRoute()->handleIn(
-                $this->context,
                 $request,
-                $hit->parameters
+                $hit->parameters,
+                $this->greenleaf->archetype,
             );
         }
 
@@ -83,13 +75,13 @@ class Greenleaf implements
         } catch (HarvestNotFoundException $f) {
             if (Monarch::isDevelopment()) {
                 // See if rebuilding the router helps
-                $this->context->clearDevCache();
+                $this->greenleaf->clearDevCache();
 
                 if ($hit = $this->getHit($request)) {
                     return $hit->getRoute()->handleIn(
-                        $this->context,
                         $request,
-                        $hit->parameters
+                        $hit->parameters,
+                        $this->greenleaf->archetype,
                     );
                 }
             }
@@ -104,13 +96,11 @@ class Greenleaf implements
         }
     }
 
-    /**
-     * Perform routing
-     */
+
     protected function getHit(
         PsrRequest &$request
     ): ?Hit {
-        $hit = $this->context->matchIn($request, true);
+        $hit = $this->greenleaf->matchIn($request, true);
         $request = $request->withAttribute('route', $hit?->getRoute());
         return $hit;
     }

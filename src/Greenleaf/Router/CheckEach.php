@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Router;
 
-use DecodeLabs\Greenleaf\Context;
-use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Router;
 use DecodeLabs\Greenleaf\RouterTrait;
@@ -23,18 +21,6 @@ class CheckEach implements Router, Caching
     use RouterTrait;
     use RouteCollectorTrait;
 
-    protected Generator $generator;
-
-    public function __construct(
-        Context $context
-    ) {
-        $this->context = $context;
-        $this->generator = $context->loader->loadGenerator();
-    }
-
-    /**
-     * Find route for request
-     */
     public function matchIn(
         PsrRequest $request
     ): ?Hit {
@@ -52,8 +38,6 @@ class CheckEach implements Router, Caching
 
 
     /**
-     * Find route for leaf URI
-     *
      * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     public function matchOut(

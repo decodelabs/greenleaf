@@ -12,8 +12,6 @@ namespace DecodeLabs\Greenleaf;
 interface Generator
 {
     /**
-     * Generate routes
-     *
      * @return iterable<Route|Generator>
      */
     public function generateRoutes(): iterable;

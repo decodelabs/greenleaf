@@ -28,8 +28,6 @@ class Greenleaf implements Scanner
     protected bool $local = false;
 
     /**
-     * Init with interface and namespace map
-     *
      * @param class-string $interface
      */
     public function __construct(
@@ -44,25 +42,16 @@ class Greenleaf implements Scanner
         $this->local = $local;
     }
 
-    /**
-     * Get mapped interface
-     */
     public function getInterface(): string
     {
         return $this->interface;
     }
 
-    /**
-     * Get resolver priority
-     */
     public function getPriority(): int
     {
         return 25;
     }
 
-    /**
-     * Resolve Archetype class location
-     */
     public function resolve(
         string $name
     ): ?string {
@@ -99,9 +88,6 @@ class Greenleaf implements Scanner
         return null;
     }
 
-    /**
-     * Scan for available for classes
-     */
     public function scanClasses(): Generator
     {
         foreach ($this->namespaces->map($this->interface, $this->local) as $namespace) {

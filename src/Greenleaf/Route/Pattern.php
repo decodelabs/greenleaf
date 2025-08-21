@@ -20,18 +20,12 @@ class Pattern implements Stringable, Dumpable
     protected string $pattern;
 
 
-    /**
-     * Init with pattern
-     */
     public function __construct(
         string $pattern
     ) {
         $this->pattern = $this->normalize($pattern);
     }
 
-    /**
-     * Normalize pattern
-     */
     protected function normalize(
         string $pattern
     ): string {
@@ -44,8 +38,6 @@ class Pattern implements Stringable, Dumpable
 
 
     /**
-     * Get segments
-     *
      * @return array<Segment>
      */
     public function parseSegments(
@@ -77,9 +69,6 @@ class Pattern implements Stringable, Dumpable
     }
 
 
-    /**
-     * Convert to string
-     */
     public function __toString(): string
     {
         return $this->pattern;

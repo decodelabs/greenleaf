@@ -16,17 +16,12 @@ use Stringable;
 
 interface Router
 {
-    /**
-     * Find route for request
-     */
     public function matchIn(
         PsrRequest $request
     ): ?Hit;
 
 
     /**
-     * Find route for leaf URI
-     *
      * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     public function matchOut(

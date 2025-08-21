@@ -12,6 +12,7 @@ namespace DecodeLabs\Greenleaf\Route\Parameter;
 use Attribute;
 use DecodeLabs\Greenleaf\Route\Parameter;
 use DecodeLabs\Guidance;
+use DecodeLabs\Monarch;
 
 #[Attribute]
 class Uuid extends Parameter
@@ -28,7 +29,8 @@ class Uuid extends Parameter
         $value ??= $this->default;
 
         if (class_exists(Guidance::class)) {
-            return Guidance::isValidUuid($value);
+            $guidance = Monarch::getService(Guidance::class);
+            return $guidance->isValidUuid($value);
         }
 
         return $value !== null;

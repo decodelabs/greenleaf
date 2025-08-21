@@ -32,9 +32,6 @@ class Segment implements
      */
     protected array $parameterNames;
 
-    /**
-     * Parse string
-     */
     public static function fromString(
         int $index,
         string $segment,
@@ -58,8 +55,6 @@ class Segment implements
     }
 
     /**
-     * Init with parts
-     *
      * @param array<string|Parameter> $tokens
      */
     final public function __construct(
@@ -81,8 +76,6 @@ class Segment implements
 
 
     /**
-     * Get parameter names
-     *
      * @return array<string>
      */
     public function getParameterNames(): array
@@ -104,9 +97,6 @@ class Segment implements
         return $this->parameterNames;
     }
 
-    /**
-     * Is whole parameter
-     */
     public function isWholeParameter(): bool
     {
         return
@@ -130,9 +120,6 @@ class Segment implements
         return $params;
     }
 
-    /**
-     * Is multi segment
-     */
     public function isMultiSegment(): bool
     {
         if (!$this->isWholeParameter()) {
@@ -145,8 +132,6 @@ class Segment implements
     }
 
     /**
-     * Check match
-     *
      * @return array<?string>|null
      */
     public function match(
@@ -171,9 +156,6 @@ class Segment implements
         return $params;
     }
 
-    /**
-     * Compile to regex
-     */
     public function compile(): string
     {
         $parts = [];
@@ -191,8 +173,6 @@ class Segment implements
     }
 
     /**
-     * Convert back to string
-     *
      * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     public function resolve(

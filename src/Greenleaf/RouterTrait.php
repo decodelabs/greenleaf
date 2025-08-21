@@ -16,29 +16,22 @@ use DecodeLabs\Greenleaf\Generator\Caching;
  */
 trait RouterTrait
 {
-    protected Context $context;
-
     public function __construct(
-        Context $context
+        protected Generator $generator
     ) {
-        $this->context = $context;
     }
 
     public function clearCache(): void
     {
-        $generator = $this->context->loader->loadGenerator();
-
-        if ($generator instanceof Caching) {
-            $generator->clearCache();
+        if ($this->generator instanceof Caching) {
+            $this->generator->clearCache();
         }
     }
 
     public function rebuildCache(): void
     {
-        $generator = $this->context->loader->loadGenerator();
-
-        if ($generator instanceof Caching) {
-            $generator->rebuildCache();
+        if ($this->generator instanceof Caching) {
+            $this->generator->rebuildCache();
         }
     }
 }

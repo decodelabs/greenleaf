@@ -24,12 +24,13 @@ class Parameter implements JsonSerializable
      * @param array<string,mixed> $data
      */
     public static function fromArray(
-        array $data
+        array $data,
+        Archetype $archetype
     ): Parameter {
         if (isset($data['type'])) {
             $type = Coercion::asString($data['type']);
             unset($data['type']);
-            $class = Archetype::resolve(Parameter::class, ucfirst($type));
+            $class = $archetype->resolve(Parameter::class, ucfirst($type));
         } else {
             $class = self::class;
         }

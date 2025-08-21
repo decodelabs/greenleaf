@@ -11,7 +11,7 @@ namespace DecodeLabs\Commandment\Action\Greenleaf;
 
 use DecodeLabs\Commandment\Action;
 use DecodeLabs\Commandment\Request;
-use DecodeLabs\Greenleaf\Context;
+use DecodeLabs\Greenleaf;
 use DecodeLabs\Monarch;
 use DecodeLabs\Terminus\Session;
 
@@ -19,7 +19,7 @@ class Scan implements Action
 {
     public function __construct(
         protected Session $io,
-        protected Context $context
+        protected Greenleaf $greenleaf
     ) {
     }
 
@@ -31,8 +31,7 @@ class Scan implements Action
             return false;
         }
 
-        $this->context->rebuildDevCache();
-
+        $this->greenleaf->rebuildDevCache();
         $this->io->success('Dev cache rebuilt');
 
         return true;

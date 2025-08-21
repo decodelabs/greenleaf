@@ -9,27 +9,26 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Generator;
 
-use DecodeLabs\Greenleaf\Context;
+use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\PageAction;
+use DecodeLabs\Slingshot;
 
 class Pages implements Generator, Orderable
 {
     public int $priority = 5;
-    protected Context $context;
 
     public function __construct(
-        Context $context
+        protected Archetype $archetype
     ) {
-        $this->context = $context;
     }
 
     public function generateRoutes(): iterable
     {
         $providers = [];
-        $slingshot = $this->context->newSlingshot();
+        $slingshot = new Slingshot();
 
-        foreach ($this->context->archetype->scanClasses(PageAction::class) as $class) {
+        foreach ($this->archetype->scanClasses(PageAction::class) as $class) {
             $providers[] = $slingshot->newInstance($class);
         }
 

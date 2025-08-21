@@ -15,8 +15,7 @@ use DecodeLabs\Greenleaf\PageAction;
 use DecodeLabs\Greenleaf\PageActionTrait;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route\Page as PageRoute;
-use DecodeLabs\Harvest;
-use DecodeLabs\Harvest\Response;
+use DecodeLabs\Harvest\Response\Stream as StreamResponse;
 use DecodeLabs\Monarch;
 
 class Html implements PageAction
@@ -28,9 +27,9 @@ class Html implements PageAction
 
     public function get(
         LeafRequest $request
-    ): Response {
+    ): StreamResponse {
         $path = '@pages/' . ltrim($request->leafUrl->getPath(), '/');
-        $resolvedPath = Monarch::$paths->resolve($path);
+        $resolvedPath = Monarch::getPaths()->resolve($path);
 
         if (!file_exists($resolvedPath)) {
             throw Exceptional::NotFound(
@@ -39,14 +38,11 @@ class Html implements PageAction
             );
         }
 
-        return Harvest::stream($resolvedPath, headers: [
+        return new StreamResponse($resolvedPath, headers: [
             'Content-Type' => 'text/html; charset=utf-8'
         ]);
     }
 
-    /**
-     * Generator routes
-     */
     public function generateRoutes(): iterable
     {
         foreach ($this->scanPageFiles('html') as $name => $file) {

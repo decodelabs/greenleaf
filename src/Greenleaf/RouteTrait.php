@@ -10,13 +10,14 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf;
 
 use Closure;
+use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Route\Parameter;
 use DecodeLabs\Greenleaf\Route\Pattern;
-use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Dispatcher as MiddlewareDispatcher;
 use DecodeLabs\Harvest\Profile as MiddlewareProfile;
+use DecodeLabs\Harvest\Transformer\Generic as TransformHandler;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
@@ -49,15 +50,6 @@ trait RouteTrait
         }
 
         return $pattern;
-    }
-
-    public function with(
-        mixed ...$args
-    ): static {
-        /** @var array<string,mixed> $args */
-        $parameter = Parameter::fromArray($args);
-        $this->addParameter($parameter);
-        return $this;
     }
 
     public function parseParameters(): void
@@ -293,16 +285,22 @@ trait RouteTrait
 
     protected function dispatchAction(
         LeafRequest $request,
-        Action $action
+        Action $action,
+        Archetype $archetype
     ): PsrResponse {
         return $this->dispatchMiddleware(
             request: $request,
             middleware: $action->getMiddleware($request),
             action: function (
                 PsrRequest $httpRequest
-            ) use ($request, $action): PsrResponse {
+            ) use ($request, $action, $archetype): PsrResponse {
                 $output = $action->execute($request);
-                return Harvest::transform($httpRequest, $output);
+
+                if (!$output instanceof PsrResponse) {
+                    $output = new TransformHandler($archetype)->transform($httpRequest, $output);
+                }
+
+                return $output;
             }
         );
     }

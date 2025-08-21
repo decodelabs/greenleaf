@@ -27,16 +27,20 @@ The main entry point to use Greenleaf is a PSR-15 middleware that can be used wi
 
 The system is comprised of a set of generators that can scan and find available routes, a collection of flexible route types and an extensible dispatcher architecture that allows for different matching strategies.
 
+
 ### Dispatcher
 
 While the dispatcher is usually accessed through middleware, you can if needed instantiate the Dispatcher directly and treat it as a standard PSR HTTP Handler.
 
 ```php
-use DecodeLabs\Greenleaf;
 use DecodeLabs\Harvest;
+use DecodeLabs\Monarch;
 
-$dispatcher = Greenleaf::createDispatcher();
-$request = Harvest::createRequestFromEnvironment();
+$greenleaf = Monarch::getService(Greenleaf::class);
+$harvest = Monarch::getService(Harvest::class);
+
+$dispatcher = $greenleaf->createDispatcher();
+$request = $harvest->createRequestFromEnvironment();
 $response = $dispatcher->handle($request);
 ```
 
@@ -48,7 +52,8 @@ The router will use [Archetype](https://github.com/decodelabs/archetype) to reso
 use DecodeLabs\Archetype;
 use MyApp\Http;
 
-Archetype::alias('DecodeLabs\\Greenleaf\\*', Http::class);
+$archetype = Monarch::getService(Archetype::class);
+$archetype->alias('DecodeLabs\\Greenleaf\\*', Http::class);
 ```
 
 If your app is based on the [Fabric](https://github.com/decodelabs/fabric) framework, this mapping is taken care of for you automatically, based on the app namespace in your config.
@@ -65,32 +70,33 @@ To define Routes in your directory tree, you can start with a generic `Routes` G
 ```php
 namespace MyApp\Http;
 
-use DecodeLabs\Greenleaf;
 use DecodeLabs\Greenleaf\Generator;
-use DecodeLabs\Greenleaf\GeneratorTrait;
+use DecodeLabs\Greenleaf\Route\Action;
+use DecodeLabs\Greenleaf\Route\Parameter;
+use DecodeLabs\Greenleaf\Route\Redirect;
 
 class Routes implements Generator
 {
-    use GeneratorTrait;
-
     public function generateRoutes(): iterable
     {
         // Basic route
-        yield Greenleaf::action('/', 'home');
+        yield new Action('/', 'home');
 
         // Basic route with parameter
-        yield Greenleaf::action('test/{slug}', 'test')
+        yield new Action('test/{slug}', 'test')
 
         // Route with inset parameters
-        yield Greenleaf::action('test-{slug}/', 'test?hello')
-            ->with('slug', validate: 'slug');
+        yield new Action('test-{slug}/', 'test?hello', parameters: [
+            new Parameter\Slug('name')
+        ])
 
         // Route with multi-part path parameters
-        yield Greenleaf::action('assets/{path}', 'assets')
-            ->with('path', validate: 'path');
+        yield new Action('assets/{path}', 'assets', parameters: [
+            new Parameter\Path('path')
+        ]);
 
         // Redirect
-        yield Greenleaf::redirect('old/path', 'new/path');
+        yield new Redirect('old/path', 'new/path');
     }
 }
 ```
@@ -114,10 +120,10 @@ For example:
 
 ```php
 // Route
-Greenleaf::action('test/{slug}', 'test?hello');
+new Action('test/{slug}', 'test?hello');
 
-// Creates URI
-Greenleaf::uri('leaf:/test?hello');
+// Creates URL
+$greenleaf->url('leaf:/test?hello');
 // $parameters = ['slug' => 'value-of-slug-in-request']
 
 // Resolves to:
@@ -125,10 +131,10 @@ $actionClass = MyApp\Http\Test::class;
 
 // --------------------------
 // Or
-Greenleaf::action('blog/articles', 'blog/articles');
+new Action('blog/articles', 'blog/articles');
 
-// Creates URI
-Greenleaf::uri('leaf:/blog/articles');
+// Creates URL
+$greenleaf->url('leaf:/blog/articles');
 
 // Resolves to:
 $actionClass = MyApp\Http\Blog\Articles::class;
@@ -154,9 +160,7 @@ Note that most traits that work in this fashion will use `Slingshot` to invoke t
 ```php
 namespace MyApp\Http;
 
-use DecodeLabs\Harvest;
-use DecodeLabs\Harvest\Response;
-use DecodeLabs\Greenleaf;
+use DecodeLabs\Harvest\Response\Text as TextResponse;
 use DecodeLabs\Greenleaf\Action;
 use DecodeLabs\Greenleaf\Action\ByMethodTrait;
 
@@ -166,14 +170,14 @@ class Test implements Action
 
     public function get(
         string $slug
-    ): Response {
-        return Harvest::text('Get response');
+    ): TextResponse {
+        return new TextResponse('Get response');
     }
 
     public function post(
         string $slug
-    ): Response {
-        return Harvest::text('Post response');
+    ): TextResponse {
+        return new TextResponse('Post response');
     }
 }
 ```
@@ -190,17 +194,13 @@ When a page route is matched, the file path is resolved using [Monarch's](https:
 ```php
 ...
 
+use DecodeLabs\Greenfleaf\Route\Page;
+
 // HTML file /src/components/pages/about.html
-yield Greenleaf::page('about', 'about.html');
+yield new Page('about', 'about.html');
 
 // Horizon Page /src/components/pages/blog.php
-yield Greenleaf::page('blog', 'blog.php');
-
-// Set default component type
-Greenleaf::setDefaultPageType('php');
-
-// Same as above
-yield Greenleaf::page('blog');
+yield new Page('blog', 'blog.php');
 ```
 
 ### HTTP URLs
@@ -210,11 +210,9 @@ One of the main benefits of Greenleaf is that it allows you to generate URLs for
 The router will then be able to match these URLs to the correct route and pass the parameters to the HTTP URL generator.
 
 ```php
-use DecodeLabs\Greenleaf;
-
 // route pattern: test/{slug}
 
-$url = Greenleaf::url(
+$url = $greenleaf->url(
     'test?hello#fragment',
     ['slug' => 'my-slug']
 );

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Router;
 
+use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\Route\Hit;
@@ -17,6 +18,7 @@ use DecodeLabs\Greenleaf\Router\PatternSwitch\InStep;
 use DecodeLabs\Greenleaf\Router\PatternSwitch\OutMap;
 use DecodeLabs\Greenleaf\RouterTrait;
 use DecodeLabs\Iota;
+use DecodeLabs\Iota\Repository as IotaRepository;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use Stringable;
@@ -26,11 +28,16 @@ class PatternSwitch implements Caching, Router
     use RouterTrait;
     use RouteCollectorTrait;
 
-    protected ?Generator $generator;
+    protected IotaRepository $iotaRepo;
 
-    /**
-     * Find route for request
-     */
+    public function __construct(
+        protected Generator $generator,
+        protected Archetype $archetype,
+        Iota $iota
+    ) {
+        $this->iotaRepo = $iota->loadStatic('greenleaf');
+    }
+
     public function matchIn(
         PsrRequest $request
     ): ?Hit {
@@ -39,8 +46,6 @@ class PatternSwitch implements Caching, Router
 
 
     /**
-     * Find route for leaf URI
-     *
      * @param array<string,string|Stringable|int|float|bool|null> $parameters
      */
     public function matchOut(
@@ -50,34 +55,24 @@ class PatternSwitch implements Caching, Router
         return $this->loadSwitches()->matchOut($uri, $parameters);
     }
 
-    protected function getGenerator(): Generator
-    {
-        if (!isset($this->generator)) {
-            $this->generator = $this->context->loader->loadGenerator();
-        }
-
-        return $this->generator;
-    }
-
     protected function loadSwitches(): Router
     {
-        $repo = Iota::loadStatic('greenleaf');
-
-        if (!$repo->has('patternSwitch')) {
-            $repo->store('patternSwitch', $this->generateSwitchCode());
+        if (!$this->iotaRepo->has('patternSwitch')) {
+            $this->iotaRepo->store('patternSwitch', $this->generateSwitchCode());
         }
 
-        return $repo->returnAsType('patternSwitch', Router::class);
+        $output = $this->iotaRepo->returnAsType('patternSwitch', Router::class);
+        // @phpstan-ignore-next-line
+        $output->archetype = $this->archetype;
+        return $output;
     }
 
     public function clearCache(): void
     {
-        $repo = Iota::loadStatic('greenleaf');
-        $repo->purge();
-        $generator = $this->getGenerator();
+        $this->iotaRepo->purge();
 
-        if ($generator instanceof Caching) {
-            $generator->clearCache();
+        if ($this->generator instanceof Caching) {
+            $this->generator->clearCache();
         }
     }
 
@@ -89,12 +84,13 @@ class PatternSwitch implements Caching, Router
 
     protected function generateSwitchCode(): string
     {
-        $routes = $this->collectRoutes($this->getGenerator());
+        $routes = $this->collectRoutes($this->generator);
         $uses = [];
 
         $matchInString = str_replace("\n", "\n            ", $this->generateMatchIn($routes, $uses));
         $matchOutString = str_replace("\n", "\n        ", $this->generateMatchOut($routes, $uses));
 
+        $uses['Archetype'] = 'DecodeLabs\Archetype';
         $uses['Hit'] = 'DecodeLabs\Greenleaf\Route\Hit';
         $uses['Router'] = 'DecodeLabs\Greenleaf\Router';
         $uses['Monarch'] = 'DecodeLabs\Monarch';
@@ -121,6 +117,8 @@ class PatternSwitch implements Caching, Router
 
         return new class implements Router
         {
+            public Archetype \$archetype;
+
             public function matchIn(
                 PsrRequest \$request
             ): ?Hit {

@@ -23,17 +23,11 @@ class Hit
     ) {
     }
 
-    /**
-     * Get route
-     */
     public function getRoute(): Route
     {
         return $this->route;
     }
 
-    /**
-     * Get query string
-     */
     public function getQueryString(): ?string
     {
         return $this->queryString;

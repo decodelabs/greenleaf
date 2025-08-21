@@ -201,7 +201,7 @@ class InStep
                         <<<PHP
                         {$defaultsString}
                         \$valid = true;
-                        \$potentialRoute = \\{$routeClass}::fromArray({$routeArgs});
+                        \$potentialRoute = \\{$routeClass}::fromArray({$routeArgs}, \$this->archetype);
 
                         foreach(\$potentialRoute->parameters as \$parameter) {
                             if(!\$parameter->validate(\$params[\$parameter->name])) {
@@ -220,7 +220,7 @@ class InStep
                     $hitString =
                         <<<PHP
                         {$defaultsString}
-                        return new Hit(\\{$routeClass}::fromArray({$routeArgs}), \$params);
+                        return new Hit(\\{$routeClass}::fromArray({$routeArgs}, \$this->archetype), \$params);
                         PHP;
                 }
 

@@ -11,15 +11,13 @@ namespace DecodeLabs\Greenleaf;
 
 use DecodeLabs\Exceptional;
 use DecodeLabs\Greenleaf\Request as LeafRequest;
-use DecodeLabs\Harvest;
 use DecodeLabs\Harvest\Profile as MiddlewareProfile;
 use DecodeLabs\Harvest\Request as HarvestRequest;
+use DecodeLabs\Harvest\Response\Json as JsonResponse;
 use DecodeLabs\Harvest\Stage\Deferred as DeferredStage;
 use DecodeLabs\Monarch;
-use DecodeLabs\Pandora\Container as PandoraContainer;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Slingshot;
-use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use ReflectionAttribute;
@@ -31,14 +29,6 @@ use Throwable;
  */
 trait ActionTrait
 {
-    protected Context $context;
-
-    public function __construct(
-        Context $context
-    ) {
-        $this->context = $context;
-    }
-
     public function getMiddleware(
         LeafRequest $request
     ): ?MiddlewareProfile {
@@ -86,9 +76,7 @@ trait ActionTrait
     protected function prepareSlingshot(
         LeafRequest $request
     ): Slingshot {
-        $output = new Slingshot(
-            container: $this->context->container
-        );
+        $output = new Slingshot();
 
         /** @var array<string,mixed> */
         $attributes = $request->httpRequest->getAttributes();
@@ -107,20 +95,12 @@ trait ActionTrait
             LeafRequest::class => $request,
             LeafUrl::class => $request->leafUrl,
             PsrRequest::class => $request->httpRequest,
-            Container::class => $this->context->container
         ]);
 
         if ($request->httpRequest instanceof HarvestRequest) {
             $output->addType(
                 $request->httpRequest,
                 HarvestRequest::class
-            );
-        }
-
-        if ($this->context->container instanceof PandoraContainer) {
-            $output->addType(
-                $this->context->container,
-                PandoraContainer::class
             );
         }
 
@@ -145,7 +125,7 @@ trait ActionTrait
                 $data = null;
             }
 
-            return Harvest::json([
+            return new JsonResponse([
                 'error' => $e->getMessage(),
                 'data' => $data
             ], $code);

@@ -9,25 +9,24 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf\Generator;
 
+use DecodeLabs\Archetype;
 use DecodeLabs\Archetype\NamespaceList;
 use DecodeLabs\Greenleaf\Action;
-use DecodeLabs\Greenleaf\Context;
 use DecodeLabs\Greenleaf\Generator;
 use DecodeLabs\Greenleaf\Route;
 use DecodeLabs\Greenleaf\Route\Action as ActionRoute;
 use DecodeLabs\Greenleaf\Route\Parameter;
 use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
+use DecodeLabs\Slingshot;
 use ReflectionClass;
 
 class Directory implements Generator, Orderable
 {
     public int $priority = 10;
-    protected Context $context;
 
     public function __construct(
-        Context $context
+        protected Archetype $archetype
     ) {
-        $this->context = $context;
     }
 
     public function generateRoutes(): iterable
@@ -42,11 +41,11 @@ class Directory implements Generator, Orderable
      */
     private function loadFromUserlandGenerators(): iterable
     {
-        $namespaces = $this->context->archetype->getNamespaceMap()->map(Generator::class);
-        $slingshot = $this->context->newSlingshot();
+        $namespaces = $this->archetype->getNamespaceMap()->map(Generator::class);
+        $slingshot = new Slingshot();
         $generators = [];
 
-        foreach ($this->context->archetype->scanClasses(Generator::class) as $path => $class) {
+        foreach ($this->archetype->scanClasses(Generator::class) as $path => $class) {
             $generator = $slingshot->newInstance($class);
             $priority = $generator instanceof Orderable ? $generator->priority : 0;
 
@@ -76,9 +75,10 @@ class Directory implements Generator, Orderable
      */
     private function loadActions(): iterable
     {
-        $namespaces = $this->context->archetype->getNamespaceMap()->map(Action::class);
+        $namespaces = $this->archetype->getNamespaceMap()->map(Action::class);
+        $slingshot = new Slingshot();
 
-        foreach ($this->context->archetype->scanClasses(Action::class) as $path => $class) {
+        foreach ($this->archetype->scanClasses(Action::class) as $path => $class) {
             $ref = new ReflectionClass($class);
             $attributes = $ref->getAttributes();
 
@@ -87,7 +87,7 @@ class Directory implements Generator, Orderable
             /** @var array<Parameter> */
             $parameters = [];
 
-            $action = new $class($this->context);
+            $action = $slingshot->newInstance($class);
             $supportedMethods = iterator_to_array($action->scanSupportedMethods());
 
             foreach ($attributes as $attribute) {

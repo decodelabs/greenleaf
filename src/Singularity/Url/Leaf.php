@@ -28,9 +28,6 @@ class Leaf implements
     use QueryTrait;
     use FragmentTrait;
 
-    /**
-     * Parse string
-     */
     public static function fromString(
         string $uri
     ): static {
@@ -61,9 +58,6 @@ class Leaf implements
         );
     }
 
-    /**
-     * Init with parts
-     */
     final public function __construct(
         ?string $path = null,
         ?string $query = null,
@@ -80,9 +74,6 @@ class Leaf implements
 
 
 
-    /**
-     * Convert to string
-     */
     public function __toString(): string
     {
         $output = 'leaf:';
@@ -102,9 +93,6 @@ class Leaf implements
         return $output;
     }
 
-    /**
-     * Convert to class name string
-     */
     public function toClassName(): string
     {
         $output = '';

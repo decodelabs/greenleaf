@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace DecodeLabs\Greenleaf;
 
+use DecodeLabs\Archetype;
 use DecodeLabs\Greenleaf\Route\Hit;
 use DecodeLabs\Greenleaf\Route\Parameter;
 use DecodeLabs\Greenleaf\Route\Pattern;
@@ -37,14 +38,8 @@ interface Route extends JsonSerializable
      * @param array<string,mixed> $data
      */
     public static function fromArray(
-        array $data
-    ): static;
-
-    /**
-     * @return $this
-     */
-    public function with(
-        string $name
+        array $data,
+        Archetype $archetype
     ): static;
 
     public function parseParameters(): void;
@@ -102,11 +97,11 @@ interface Route extends JsonSerializable
 
 
     /**
-     * @param array<string, mixed> $parameters
+     * @param array<string,mixed> $parameters
      */
     public function handleIn(
-        Context $context,
         PsrRequest $request,
-        array $parameters
+        array $parameters,
+        Archetype $archetype
     ): PsrResponse;
 }

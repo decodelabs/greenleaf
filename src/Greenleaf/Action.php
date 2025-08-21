@@ -14,10 +14,6 @@ use DecodeLabs\Harvest\Profile as MiddlewareProfile;
 
 interface Action
 {
-    public function __construct(
-        Context $context
-    );
-
     public function getMiddleware(
         LeafRequest $request
     ): ?MiddlewareProfile;

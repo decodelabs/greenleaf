@@ -25,8 +25,6 @@ trait RouteCollectorTrait
     }
 
     /**
-     * Scan routes
-     *
      * @return Generator<string, Route>
      */
     protected function scanRoutes(
