@@ -5,12 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Unreleased
+--
+
+---
+
+### [v0.10.0](https://github.com/decodelabs/greenleaf/commits/v0.10.0) - 21st August 2025
+
 - Added Kingdom Service support
 - Removed Veneer dependency
 - Simplified loading process
 - Removed default page type
 - Pass required services to handleIn()
 - Removed Parameter array constructor support
+
+[Full list of changes](https://github.com/decodelabs/greenleaf/compare/v0.9.5...v0.10.0)
 
 ---
 
