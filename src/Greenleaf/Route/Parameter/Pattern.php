@@ -10,15 +10,22 @@ declare(strict_types=1);
 namespace DecodeLabs\Greenleaf\Route\Parameter;
 
 use Attribute;
-use DecodeLabs\Coercion;
 use DecodeLabs\Greenleaf\Route\Parameter;
 
 #[Attribute]
-class Number extends Parameter
+class Pattern extends Parameter
 {
+    public function __construct(
+        string $name,
+        protected string $pattern,
+        ?string $default = null
+    ) {
+        parent::__construct($name, $default);
+    }
+
     public function getRegexFragment(): string
     {
-        return '(?P<' . $this->name . '>[0-9]+)';
+        return '(?P<' . $this->name . '>(' . $this->pattern . '))';
     }
 
 
@@ -26,16 +33,7 @@ class Number extends Parameter
         ?string $value
     ): bool {
         $value ??= $this->default;
-
-        return
-            $value !== null &&
-            ctype_digit($value);
-    }
-
-    public function resolve(
-        ?string $value
-    ): mixed {
-        return Coercion::tryInt($value ?? $this->default);
+        return $value !== null;
     }
 
     /**
@@ -44,7 +42,8 @@ class Number extends Parameter
     public function jsonSerialize(): array
     {
         return [
-            'type' => 'number',
+            'type' => 'pattern',
+            'pattern' => $this->pattern,
             'name' => $this->name,
             'default' => $this->default,
         ];

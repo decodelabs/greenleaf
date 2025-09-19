@@ -43,7 +43,7 @@
         "decodelabs/terminus": "<0.14"
     },
     "suggest": {
-        "decodelabs/guidance": "Uuid route support"
+        "decodelabs/guidance": "Uid route support"
     },
     "autoload": {
         "psr-4": {

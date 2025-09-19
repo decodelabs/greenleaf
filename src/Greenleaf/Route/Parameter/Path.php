@@ -22,7 +22,7 @@ class Path extends Parameter
 
     public function getRegexFragment(): string
     {
-        return '(?P<' . $this->name . '>.+?)';
+        return '(?P<' . $this->name . '>.+)';
     }
 
     public function validate(

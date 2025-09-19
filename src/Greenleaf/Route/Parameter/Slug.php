@@ -18,7 +18,7 @@ class Slug extends Parameter
 {
     public function getRegexFragment(): string
     {
-        return '(?P<' . $this->name . '>[a-z0-9\-_]+?)';
+        return '(?P<' . $this->name . '>[a-z0-9\-_]+)';
     }
 
 

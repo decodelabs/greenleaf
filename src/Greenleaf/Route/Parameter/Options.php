@@ -29,16 +29,15 @@ class Options extends Parameter
         ?string $default = null
     ) {
         parent::__construct($name, $default);
-
-        $this->values = array_map(
-            fn (string $value) => preg_quote($value),
-            $values
-        );
+        $this->values = $values;
     }
 
     public function getRegexFragment(): string
     {
-        return '(?P<' . $this->name . '>' . implode('|', $this->values) . ')';
+        return '(?P<' . $this->name . '>' . implode('|', array_map(
+            fn (string $value) => preg_quote($value),
+            $this->values
+        )) . ')';
     }
 
     public function validate(

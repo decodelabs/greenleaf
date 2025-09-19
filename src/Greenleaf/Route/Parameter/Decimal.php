@@ -11,15 +11,13 @@ namespace DecodeLabs\Greenleaf\Route\Parameter;
 
 use Attribute;
 use DecodeLabs\Greenleaf\Route\Parameter;
-use DecodeLabs\Guidance;
-use DecodeLabs\Monarch;
 
 #[Attribute]
-class Uuid extends Parameter
+class Decimal extends Parameter
 {
     public function getRegexFragment(): string
     {
-        return '(?P<' . $this->name . '>([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}+)?)';
+        return '(?P<' . $this->name . '>([0-9]+)(\.[0-9]+)?)';
     }
 
 
@@ -28,12 +26,15 @@ class Uuid extends Parameter
     ): bool {
         $value ??= $this->default;
 
-        if (class_exists(Guidance::class)) {
-            $guidance = Monarch::getService(Guidance::class);
-            return $guidance->isValidUuid($value);
-        }
+        return
+            $value !== null &&
+            is_numeric($value);
+    }
 
-        return $value !== null;
+    public function resolve(
+        ?string $value
+    ): mixed {
+        return $value ?? $this->default;
     }
 
     /**
@@ -42,7 +43,7 @@ class Uuid extends Parameter
     public function jsonSerialize(): array
     {
         return [
-            'type' => 'uuid',
+            'type' => 'decimal',
             'name' => $this->name,
             'default' => $this->default,
         ];
