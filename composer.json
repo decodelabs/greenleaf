@@ -31,14 +31,12 @@
     },
     "require-dev": {
         "decodelabs/commandment": "^0.3",
-        "decodelabs/guidance": "^0.3",
         "decodelabs/pandora": "^0.4",
         "decodelabs/phpstan-decodelabs": "^0.7",
         "decodelabs/terminus": "^0.14"
     },
     "conflict": {
         "decodelabs/commandment": "<0.3",
-        "decodelabs/guidance": "<0.3",
         "decodelabs/pandora": "<0.4",
         "decodelabs/terminus": "<0.14"
     },
