@@ -15,6 +15,8 @@ Greenleaf provides a fast and flexible way to route HTTP requests to your action
 
 ## Installation
 
+This package requires PHP 8.4 or higher.
+
 Install via Composer:
 
 ```bash
