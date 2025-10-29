@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [v0.10.5](https://github.com/decodelabs/greenleaf/commits/v0.10.5) - 29th October 2025
 
+- Allow using PSR-15 middleware as attributes directly
 
 [Full list of changes](https://github.com/decodelabs/greenleaf/compare/v0.10.4...v0.10.5)
 
