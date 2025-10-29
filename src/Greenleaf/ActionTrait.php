@@ -20,6 +20,7 @@ use DecodeLabs\Singularity\Url\Leaf as LeafUrl;
 use DecodeLabs\Slingshot;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
+use Psr\Http\Server\MiddlewareInterface as PsrMiddleware;
 use ReflectionAttribute;
 use ReflectionClass;
 use Throwable;
@@ -41,15 +42,24 @@ trait ActionTrait
         $output = new MiddlewareProfile();
 
         foreach ($attributes as $attribute) {
-            $attribute = $attribute->newInstance();
-            $middleware = $attribute->middleware;
+            $class = $attribute->getName();
 
-            if (is_string($middleware)) {
-                $output->add(new DeferredStage(
-                    $middleware,
-                    parameters: $attribute->parameters
-                ));
-            } else {
+            if ($class === Middleware::class) {
+                /** @var Middleware $container */
+                $container = $attribute->newInstance();
+                $middleware = $container->middleware;
+
+                if (is_string($middleware)) {
+                    $output->add(new DeferredStage(
+                        $middleware,
+                        parameters: $container->parameters
+                    ));
+                } else {
+                    $output->add($middleware);
+                }
+            } elseif (is_a($class, PsrMiddleware::class, true)) {
+                /** @var PsrMiddleware $middleware */
+                $middleware = $attribute->newInstance();
                 $output->add($middleware);
             }
         }
@@ -63,13 +73,27 @@ trait ActionTrait
     }
 
     /**
-     * @return array<ReflectionAttribute<Middleware>>
+     * @return array<ReflectionAttribute<Middleware|PsrMiddleware>>
      */
     protected function getMiddlewareAttributes(
         LeafRequest $request
     ): array {
         $ref = new ReflectionClass($this);
-        return $ref->getAttributes(Middleware::class);
+        $output = [];
+
+        foreach ($ref->getAttributes() as $attribute) {
+            $class = $attribute->getName();
+
+            if (
+                $class === Middleware::class ||
+                is_a($class, PsrMiddleware::class, true)
+            ) {
+                /** @var ReflectionAttribute<Middleware|PsrMiddleware> $attribute */
+                $output[] = $attribute;
+            }
+        }
+
+        return $output;
     }
 
 
