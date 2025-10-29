@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+### [v0.10.5](https://github.com/decodelabs/greenleaf/commits/v0.10.5) - 29th October 2025
+
+
+[Full list of changes](https://github.com/decodelabs/greenleaf/compare/v0.10.4...v0.10.5)
+
+---
+
 ### [v0.10.4](https://github.com/decodelabs/greenleaf/commits/v0.10.4) - 3rd October 2025
 
 - Upgraded Nuance to v0.2
