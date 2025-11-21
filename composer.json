@@ -2,12 +2,14 @@
     "name": "decodelabs/greenleaf",
     "description": "Super-fast directory based HTTP router",
     "type": "library",
-    "keywords": [ ],
+    "keywords": [],
     "license": "MIT",
-    "authors": [ {
+    "authors": [
+        {
             "name": "Tom Wright",
             "email": "tom@inflatablecookie.com"
-        } ],
+        }
+    ],
     "require": {
         "php": "^8.4",
 
@@ -30,6 +32,7 @@
         "psr/http-server-middleware": "^1.0.2"
     },
     "require-dev": {
+        "decodelabs/chorus": "^0.1",
         "decodelabs/commandment": "^0.3",
         "decodelabs/pandora": "^0.4",
         "decodelabs/phpstan-decodelabs": "^0.7",
