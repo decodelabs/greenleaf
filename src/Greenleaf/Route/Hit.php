@@ -17,9 +17,9 @@ class Hit
      * @param array<string,mixed> $parameters
      */
     public function __construct(
-        protected(set) Route $route,
-        protected(set) array $parameters,
-        protected(set) ?string $queryString = null
+        public protected(set) Route $route,
+        public protected(set) array $parameters,
+        public protected(set) ?string $queryString = null
     ) {
     }
 

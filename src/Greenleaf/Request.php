@@ -15,11 +15,11 @@ use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 class Request
 {
     public function __construct(
-        protected(set) LeafUrl $leafUrl,
-        protected(set) PsrRequest $httpRequest,
+        public protected(set) LeafUrl $leafUrl,
+        public protected(set) PsrRequest $httpRequest,
         /** @var array<string,mixed> */
-        protected(set) array $parameters,
-        protected(set) Route $route
+        public protected(set) array $parameters,
+        public protected(set) Route $route
     ) {
     }
 

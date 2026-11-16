@@ -56,9 +56,9 @@ class Greenleaf implements Service
     }
 
     public function __construct(
-        protected(set) Router $router,
-        protected(set) Generator $generator,
-        protected(set) Archetype $archetype,
+        public protected(set) Router $router,
+        public protected(set) Generator $generator,
+        public protected(set) Archetype $archetype,
         Iota $iota
     ) {
         $this->iotaRepo = Coercion::newLazyProxy(
