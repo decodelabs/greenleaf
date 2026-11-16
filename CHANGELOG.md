@@ -5,10 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Unreleased
+--
+
+---
+
+### [v0.10.6](https://github.com/decodelabs/greenleaf/commits/v0.10.6) - 16th November 2026
+
 - Made public read visibility explicit on promoted properties
 - Improved doc comment headers
 - Added AGENTS.md
 - Integrated Chorus dev dependency
+
+[Full list of changes](https://github.com/decodelabs/greenleaf/compare/v0.10.5...v0.10.6)
 
 ---
 
@@ -400,4 +408,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [v0.1.0](https://github.com/decodelabs/greenleaf/commits/v0.1.0) - 9th November 2023
 
 - Built initial implementation
-
